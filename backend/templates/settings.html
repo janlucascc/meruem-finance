@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}MERUEM | Configurações{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell">
+    
+    {% include '_sidebar.html' %}
+
+    <main class="dashboard-main" style="display: flex; justify-content: center; align-items: flex-start; padding-top: 20px;">
+        <section class="panel-section" style="width: 100%; max-width: 520px;">
+            <div class="section-header" style="text-align: center; margin-bottom: 24px;">
+                <div>
+                    <p class="eyebrow">Segurança</p>
+                    <h2>Configurações da Conta</h2>
+                </div>
+            </div>
+
+            <article class="glass-card">
+                <h3 style="text-align: center;">Mudar Senha</h3>
+                <p class="section-copy" style="margin-bottom: 24px; text-align: center;">Atualize sua senha de acesso ao painel MERUEM.</p>
+                
+                <form method="post" action="{{ url_for('auth.change_password') }}" class="form-grid" style="grid-template-columns: 1fr;">
+                    <label>
+                        <span>Senha Atual</span>
+                        <input type="password" name="current_password" required>
+                    </label>
+                    <label>
+                        <span>Nova Senha</span>
+                        <input type="password" name="new_password" required>
+                    </label>
+                    <label>
+                        <span>Confirmar Nova Senha</span>
+                        <input type="password" name="confirm_password" required>
+                    </label>
+                    <button type="submit" class="primary-button full-width" style="margin-top: 10px;">Atualizar Senha</button>
+                </form>
+            </article>
+        </section>
+    </main>
+</div>
+{% endblock %}

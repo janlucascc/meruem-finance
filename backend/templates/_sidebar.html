@@ -1,0 +1,41 @@
+<aside class="sidebar glass-card" id="main-sidebar">
+    <div class="sidebar-top">
+        <form id="profile-form" action="{{ url_for('upload_profile_image') }}" method="POST" enctype="multipart/form-data">
+            <label class="profile-upload-wrapper" title="Mudar foto de perfil">
+                <input type="file" name="profile_pic" id="profile-input" hidden onchange="document.getElementById('profile-form').submit()">
+                {% if user_profile_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + user_profile_image) }}" class="profile-pic" alt="Perfil">
+                {% else %}
+                    <div class="profile-pic placeholder-avatar">{{ user_name[:1] | upper }}</div>
+                {% endif %}
+            </label>
+        </form>
+
+        <button class="hamburger-menu" onclick="toggleSidebar()" title="Expandir/Recolher">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <h2 class="sidebar-title">Olá, {{ user_name.split()[0] }}</h2>
+        <p class="sidebar-copy">Seu painel financeiro.</p>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <span class="nav-icon">🏠</span> <span>Visão geral</span>
+        </a>
+        <a href="{{ url_for('cards') }}" class="{% if request.endpoint == 'cards' %}active{% endif %}">
+            <span class="nav-icon">💳</span> <span>Cartão de crédito</span>
+        </a>
+        <a href="{{ url_for('balance') }}" class="{% if request.endpoint == 'balance' %}active{% endif %}">
+            <span class="nav-icon">💰</span> <span>Saldo em conta</span>
+        </a>
+        <a href="{{ url_for('settings') }}" class="{% if request.endpoint == 'settings' %}active{% endif %}">
+            <span class="nav-icon">⚙️</span> <span>Configurações</span>
+        </a>
+    </nav>
+    <a href="{{ url_for('auth.logout') }}" class="secondary-button full-width">
+         <span class="nav-icon">🚪</span> <span>Sair</span>
+    </a>
+</aside>

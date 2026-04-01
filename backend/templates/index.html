@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}MERUEM | Entrar{% endblock %}
+{% block content %}
+<div class="auth-shell">
+    <section class="hero-card glass-card">
+        <div class="brand-chip">MERUEM • auxiliar financeiro</div>
+        <h1>Controle o seu dinheiro com uma experiência simples, bonita e clara.</h1>
+        <p>Organize cartão de crédito, saldo em conta, reservas por categoria e limites comprometidos em um painel inspirado no visual moderno da Apple e do Android.</p>
+        <ul class="hero-list">
+            <li>Login e registro rápidos</li>
+            <li>Cartões com foto, limite e vencimento</li>
+            <li>Saldo, reserva e histórico em estilo planilha</li>
+        </ul>
+        <a class="developer-link" href="https://wa.me/+5573999892422" target="_blank" rel="noreferrer">Fale com um desenvolvedor</a>
+    </section>
+
+    <section class="auth-card glass-card">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="login">Entrar</button>
+            <button class="tab-button" data-tab="register">Criar conta</button>
+        </div>
+
+        <div class="tab-panel active" id="login-panel">
+            <h2>Entrar</h2>
+            <form method="post" action="{{ url_for('auth.login') }}" class="form-grid">
+                <label>
+                    <span>E-mail</span>
+                    <input type="email" name="email" placeholder="voce@email.com" required>
+                </label>
+                <label>
+                    <span>Senha</span>
+                    <input type="password" name="password" placeholder="Sua senha" required>
+                </label>
+                <button type="submit" class="primary-button">Acessar painel</button>
+            </form>
+            <a class="muted-link" href="{{ url_for('forgot_password') }}">Esqueci minha senha</a>
+        </div>
+
+        <div class="tab-panel" id="register-panel">
+            <h2>Criar conta</h2>
+            <form method="post" action="{{ url_for('auth.register') }}" class="form-grid">
+                <label>
+                    <span>Nome completo</span>
+                    <input type="text" name="full_name" placeholder="Seu nome" required>
+                </label>
+                <label>
+                    <span>E-mail</span>
+                    <input type="email" name="email" placeholder="voce@email.com" required>
+                </label>
+                <label>
+                    <span>Senha</span>
+                    <input type="password" name="password" placeholder="Crie uma senha" required>
+                </label>
+                <label>
+                    <span>Confirmar senha</span>
+                    <input type="password" name="confirm_password" placeholder="Repita a senha" required>
+                </label>
+                <button type="submit" class="primary-button">Criar minha conta</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

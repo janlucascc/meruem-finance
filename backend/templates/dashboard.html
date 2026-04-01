@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}MERUEM | Visão Geral{% endblock %}
+
+{% macro card_metrica(titulo, valor) %}
+<div class="metric-card glass-inner">
+    <span>{{ titulo }}</span>
+    <strong>R$ {{ valor | brl }}</strong>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="dashboard-shell">
+    {% include '_sidebar.html' %}
+
+    <main class="dashboard-main">
+        <section class="topbar glass-card">
+            <div>
+                <p class="eyebrow">Visão geral</p>
+                <h1>Seu hub financeiro</h1>
+            </div>
+            <div class="summary-grid compact-summary">
+                {{ card_metrica('Total em saldo', total_balance) }}
+                {{ card_metrica('Total reservado', total_balance_reserved + total_card_reserved) }}
+                {{ card_metrica('Limite total', total_limit) }}
+                {{ card_metrica('Uso do crédito', total_used) }}
+            </div>
+        </section>
+
+        <section class="decision-grid">
+            <article class="glass-card decision-card">
+                <div class="decision-badge">Cartão de crédito</div>
+                <h3>Gerenciar limite, reserva e fatura</h3>
+                <p class="section-copy">Acesse o detalhamento de cada cartão e histórico de gastos.</p>
+                <a href="{{ url_for('cards') }}" class="primary-button inline-button" style="margin-top: 15px;">Acessar Cartões</a>
+            </article>
+
+            <article class="glass-card decision-card">
+                <div class="decision-badge">Saldo em conta</div>
+                <h3>Controlar saldo, reserva e saídas</h3>
+                <p class="section-copy">Gerencie seu fluxo de caixa e organize suas reservas financeiras.</p>
+                <a href="{{ url_for('balance') }}" class="primary-button inline-button" style="margin-top: 15px;">Acessar Saldo</a>
+            </article>
+        </section>
+    </main>
+</div>
+{% endblock %}

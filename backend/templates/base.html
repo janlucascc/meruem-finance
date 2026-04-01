@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}MERUEM{% endblock %}</title>
+    
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+    <div class="background-orbs">
+        <span class="orb orb-1"></span>
+        <span class="orb orb-2"></span>
+        <span class="orb orb-3"></span>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-stack" id="flash-stack">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.style.display='none';" style="background:none; border:none; color:inherit; font-weight:bold; cursor:pointer; margin-left:15px;">✕</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <script>
+        setTimeout(function() {
+            let flashes = document.getElementById('flash-stack');
+            if(flashes) {
+                flashes.style.transition = "opacity 0.5s ease";
+                flashes.style.opacity = "0";
+                setTimeout(() => flashes.remove(), 500); // Remove do DOM após a animação
+            }
+        }, 5000); // 5000ms = 5 segundos
+    </script>
+</body>
+</html>
