@@ -239,10 +239,17 @@ def balance_action():
     if action_type == "add":
         current_balance += amount
     elif action_type == "remove":
-        if amount > current_balance:
-            flash("Saldo insuficiente.", "error")
-            return redirect(url_for("balance"))
         current_balance -= amount
+    elif action_type == "reserve":
+        if amount > (current_balance - reserved_balance):
+            flash("Saldo livre insuficiente para guardar.", "error")
+            return redirect(url_for("balance"))
+        reserved_balance += amount
+    elif action_type == "unreserve":
+        if amount > reserved_balance:
+            flash("Valor excede reserva.", "error")
+            return redirect(url_for("balance"))
+        reserved_balance -= amount
     elif action_type == "reserve":
         if amount > (current_balance - reserved_balance):
             flash("Saldo livre insuficiente.", "error")

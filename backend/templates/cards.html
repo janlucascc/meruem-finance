@@ -10,57 +10,12 @@
 
 {% block content %}
 <div class="dashboard-shell">
-    <aside class="sidebar glass-card" id="main-sidebar">
-        <div class="sidebar-top">
-            <form id="profile-form" action="{{ url_for('upload_profile_image') }}" method="POST" enctype="multipart/form-data">
-                <label class="profile-upload-wrapper" title="Mudar foto de perfil">
-                    <input type="file" name="profile_pic" id="profile-input" hidden onchange="document.getElementById('profile-form').submit()">
-                    {% if user_profile_image %}
-                        <img src="{{ url_for('static', filename='uploads/' + user_profile_image) }}" class="profile-pic" alt="Perfil">
-                    {% else %}
-                        <div class="profile-pic placeholder-avatar">{{ user_name[:1] | upper }}</div>
-                    {% endif %}
-                </label>
-            </form>
-
-            <button class="hamburger-menu" onclick="toggleSidebar()" title="Expandir/Recolher">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-
-            <h2 class="sidebar-title">Olá, {{ user_name.split()[0] }}</h2>
-            <p class="sidebar-copy">Gestão de Crédito</p>
-        </div>
-
-        <nav class="sidebar-nav">
-            <a href="{{ url_for('dashboard') }}">
-                <span class="nav-icon">🏠</span> <span>Visão geral</span>
-            </a>
-            <a href="{{ url_for('cards') }}" class="active">
-                <span class="nav-icon">💳</span> <span>Cartão de crédito</span>
-            </a>
-            <a href="{{ url_for('balance') }}">
-                <span class="nav-icon">💰</span> <span>Saldo em conta</span>
-            </a>
-            <a href="{{ url_for('settings') }}">
-                <span class="nav-icon">⚙️</span> <span>Configurações</span>
-            </a>
-        </nav>
-        <a href="{{ url_for('auth.logout') }}" class="secondary-button full-width">
-             <span class="nav-icon">🚪</span> <span>Sair</span>
-        </a>
-    </aside>
+    
+    {% include '_sidebar.html' %}
 
     <main class="dashboard-main">
         <section class="panel-section">
-            <div class="section-header">
-                <div>
-                    <p class="eyebrow">Gestão</p>
-                    <h2>Cartões de crédito</h2>
-                </div>
-            </div>
-
+            
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <p class="eyebrow">Gestão</p>
@@ -86,22 +41,10 @@
                 <h3>Resumo Global de Crédito</h3>
                 <div class="summary-grid">
                     {{ card_metrica('Limite Total', card_snapshot.total_limit) }}
-                    
                     {{ card_metrica('Comprometido (Gasto + Reserva)', card_snapshot.total_used + card_snapshot.total_reserved) }}
-                    
                     {{ card_metrica('Limite Disponível', card_snapshot.total_limit - (card_snapshot.total_used + card_snapshot.total_reserved)) }}
                 </div>
             </article>
-
-                <article class="glass-card">
-                    <h3>Resumo do crédito</h3>
-                    <div class="summary-grid">
-                        {{ card_metrica('Limite total', card_snapshot.total_limit) }}
-                        {{ card_metrica('Gasto atual', card_snapshot.total_used) }}
-                        {{ card_metrica('Limite reservado', card_snapshot.total_reserved) }}
-                    </div>
-                </article>
-            </div>
 
             <div class="card-list">
                 {% for card in card_snapshot.cards %}
@@ -143,8 +86,8 @@
                         <label>
                             <span>Ação</span>
                             <select name="action_type">
-                                <option value="use">Gasto</option>
-                                <option value="pay">Pagar fatura</option>
+                                <option value="use">Gasto (-)</option>
+                                <option value="pay">Pagar fatura (+)</option>
                                 <option value="reserve">Reservar limite</option>
                                 <option value="unreserve">Liberar reserva</option>
                             </select>
@@ -173,7 +116,11 @@
                                     <span style="font-weight: 600;">{{ tx.action_type | action_name }}</span>
                                     <small style="color: var(--text-soft); font-size: 0.7rem;">{{ tx.created_at | format_datetime }}</small>
                                 </div>
-                                <strong {% if tx.action_type == 'pay' %}style="color: var(--success);"{% endif %}>R$ {{ tx.amount | brl }}</strong>
+                                {% if tx.action_type == 'pay' %}
+                                    <strong style="color: var(--success);">R$ {{ tx.amount | brl }}</strong>
+                                {% else %}
+                                    <strong>R$ {{ tx.amount | brl }}</strong>
+                                {% endif %}
                             </div>
                             {% else %}
                             <small style="color: var(--text-soft);">Nenhum lançamento.</small>
