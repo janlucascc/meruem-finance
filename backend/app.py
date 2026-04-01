@@ -3,10 +3,14 @@ import uuid
 from functools import wraps
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 from flask import (
     Flask, render_template, request, redirect, 
     url_for, session, flash, jsonify, send_from_directory
 )
+
+# Leitura do arquivo .env (Chave do BD)
+load_dotenv()
 
 # Importando o blueprint de autenticação
 from routes.auth import auth_bp
@@ -35,7 +39,6 @@ app.register_blueprint(auth_bp)
 # ==========================================
 # INICIALIZAÇÃO PARA O RENDER (GUNICORN)
 # ==========================================
-# Isto garante que o banco é criado assim que o app liga no servidor online
 init_db()
 
 # ==========================================
@@ -48,8 +51,11 @@ def brl_format(value):
 @app.template_filter('format_datetime')
 def format_datetime(value):
     if not value: return ""
+    # O Postgres já retorna um objeto datetime nativo
+    if isinstance(value, datetime):
+        return value.strftime('%d/%m/%Y às %H:%M')
     try:
-        dt = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+        dt = datetime.strptime(str(value)[:19], '%Y-%m-%d %H:%M:%S')
         return dt.strftime('%d/%m/%Y às %H:%M')
     except:
         return value
@@ -82,7 +88,7 @@ def inject_user_data():
                 return {
                     "user_name": user["full_name"],
                     "user_profile_image": profile_img,
-                    "sidebar_balance": current_balance # <- Nova variável
+                    "sidebar_balance": current_balance
                 }
         except Exception as e:
             print(f"Erro ao carregar dados do usuário: {e}")
@@ -250,23 +256,14 @@ def balance_action():
             flash("Valor excede reserva.", "error")
             return redirect(url_for("balance"))
         reserved_balance -= amount
-    elif action_type == "reserve":
-        if amount > (current_balance - reserved_balance):
-            flash("Saldo livre insuficiente.", "error")
-            return redirect(url_for("balance"))
-        reserved_balance += amount
-    elif action_type == "unreserve":
-        if amount > reserved_balance:
-            flash("Valor excede reserva.", "error")
-            return redirect(url_for("balance"))
-        reserved_balance -= amount
 
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE balance_accounts SET current_balance = ?, reserved_balance = ? WHERE id = ?", (current_balance, reserved_balance, account["id"]))
+    # AQUI ESTÁ A ATUALIZAÇÃO PARA POSTGRESQL (%s)
+    cursor.execute("UPDATE balance_accounts SET current_balance = %s, reserved_balance = %s WHERE id = %s", (current_balance, reserved_balance, account["id"]))
     cursor.execute("""
         INSERT INTO balance_transactions (account_id, user_id, action_type, amount, category, description)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (account["id"], user_id, action_type, amount, category, description))
     conn.commit()
     conn.close()
@@ -298,9 +295,10 @@ def create_card():
 
     conn = get_connection()
     cursor = conn.cursor()
+    # AQUI ESTÁ A ATUALIZAÇÃO PARA POSTGRESQL (%s)
     cursor.execute("""
         INSERT INTO credit_cards (user_id, card_name, card_limit, used_limit, reserved_limit, due_day, image_filename)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (user_id, card_name, card_limit, 0, 0, due_day, image_filename))
     conn.commit()
     conn.close()
@@ -325,7 +323,8 @@ def card_action(card_id):
 
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM credit_cards WHERE id = ? AND user_id = ?", (card_id, user_id))
+    # AQUI ESTÁ A ATUALIZAÇÃO PARA POSTGRESQL (%s)
+    cursor.execute("SELECT * FROM credit_cards WHERE id = %s AND user_id = %s", (card_id, user_id))
     card = cursor.fetchone()
 
     if not card:
@@ -350,10 +349,11 @@ def card_action(card_id):
     elif action_type == "unreserve":
         reserved_limit = max(0, reserved_limit - amount)
 
-    cursor.execute("UPDATE credit_cards SET used_limit = ?, reserved_limit = ? WHERE id = ?", (used_limit, reserved_limit, card_id))
+    # AQUI ESTÁ A ATUALIZAÇÃO PARA POSTGRESQL (%s)
+    cursor.execute("UPDATE credit_cards SET used_limit = %s, reserved_limit = %s WHERE id = %s", (used_limit, reserved_limit, card_id))
     cursor.execute("""
         INSERT INTO card_transactions (card_id, user_id, action_type, amount, category, description)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (card_id, user_id, action_type, amount, category, description))
     conn.commit()
     conn.close()

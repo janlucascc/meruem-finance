@@ -29,16 +29,17 @@ def register():
     conn = get_connection()
     cursor = conn.cursor()
 
+    # O POSTGRES USA %s e RETURNING id
     cursor.execute("""
         INSERT INTO users (full_name, email, password_hash)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s) RETURNING id
     """, (full_name, email, password_hash))
 
-    user_id = cursor.lastrowid
+    user_id = cursor.fetchone()[0]
 
     cursor.execute("""
         INSERT INTO balance_accounts (user_id, account_name, current_balance, reserved_balance)
-        VALUES (?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s)
     """, (user_id, "Conta principal", 0, 0))
 
     conn.commit()
