@@ -33,7 +33,7 @@
                 </label>
                 <button type="submit" class="primary-button">Acessar painel</button>
             </form>
-            <a class="muted-link" href="{{ url_for('forgot_password') }}">Esqueci minha senha</a>
+            <a class="muted-link" href="{{ url_for('auth.forgot_password') }}">Esqueci minha senha</a>
         </div>
 
         <div class="tab-panel" id="register-panel">
@@ -45,7 +45,7 @@
                 </label>
                 <label>
                     <span>E-mail</span>
-                    <input type="email" name="email" placeholder="voce@email.com" required>
+                    <input type="email" name="email" placeholder="davibrito@email.com" required>
                 </label>
                 <label>
                     <span>Senha</span>
