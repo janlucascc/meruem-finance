@@ -104,9 +104,9 @@ def inject_user_data():
     return {"user_name": "Usuário", "user_profile_image": None}
 
 
-# ==========================================
+# =========================================
 # UTILITÁRIOS E DECORADORES
-# ==========================================
+# =========================================
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
