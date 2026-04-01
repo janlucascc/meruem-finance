@@ -17,8 +17,14 @@
             <span></span>
         </button>
 
-        <h2 class="sidebar-title">Olá, {{ user_name.split()[0] }}</h2>
-        <p class="sidebar-copy">Seu painel financeiro.</p>
+        <div class="sidebar-profile-info">
+            <h2 class="sidebar-title" style="margin-bottom: 2px;">Olá, {{ user_name.split()[0] }}</h2>
+            
+            <div class="sidebar-balance-container">
+                <span class="balance-label">Saldo em Conta</span>
+                <span class="balance-value">R$ {{ sidebar_balance | brl }}</span>
+            </div>
+        </div>
     </div>
 
     <nav class="sidebar-nav">
@@ -26,7 +32,7 @@
             <span class="nav-icon">🏠</span> <span>Visão geral</span>
         </a>
         <a href="{{ url_for('cards') }}" class="{% if request.endpoint == 'cards' %}active{% endif %}">
-            <span class="nav-icon">💳</span> <span>Cartão de crédito</span>
+            <span class="nav-icon">💳</span> <span>Cartões de crédito</span>
         </a>
         <a href="{{ url_for('balance') }}" class="{% if request.endpoint == 'balance' %}active{% endif %}">
             <span class="nav-icon">💰</span> <span>Saldo em conta</span>

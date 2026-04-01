@@ -70,14 +70,24 @@ def inject_user_data():
         try:
             user = get_user_by_id(session["user_id"])
             if user:
+                # Busca o saldo para mostrar na sidebar
+                account = get_user_balance_account(user["id"])
+                current_balance = account["current_balance"] if account else 0
+                
                 try:
                     profile_img = user["profile_image"]
                 except (IndexError, KeyError):
                     profile_img = None
-                return {"user_name": user["full_name"], "user_profile_image": profile_img}
+                
+                return {
+                    "user_name": user["full_name"],
+                    "user_profile_image": profile_img,
+                    "sidebar_balance": current_balance # <- Nova variável
+                }
         except Exception as e:
             print(f"Erro ao carregar dados do usuário: {e}")
-    return {"user_name": "Usuário", "user_profile_image": None}
+            
+    return {"user_name": "Usuário", "user_profile_image": None, "sidebar_balance": 0}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS

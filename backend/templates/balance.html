@@ -10,71 +10,54 @@
 
 {% block content %}
 <div class="dashboard-shell">
-    <aside class="sidebar glass-card" id="main-sidebar">
-        <div class="sidebar-top">
-            <form id="profile-form" action="{{ url_for('upload_profile_image') }}" method="POST" enctype="multipart/form-data">
-                <label class="profile-upload-wrapper" title="Mudar foto de perfil">
-                    <input type="file" name="profile_pic" id="profile-input" hidden onchange="document.getElementById('profile-form').submit()">
-                    {% if user_profile_image %}
-                        <img src="{{ url_for('static', filename='uploads/' + user_profile_image) }}" class="profile-pic" alt="Perfil">
-                    {% else %}
-                        <div class="profile-pic placeholder-avatar">{{ user_name[:1] | upper }}</div>
-                    {% endif %}
-                </label>
-            </form>
-
-            <button class="hamburger-menu" onclick="toggleSidebar()" title="Expandir/Recolher">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-
-            <h2 class="sidebar-title">Olá, {{ user_name.split()[0] }}</h2>
-            <p class="sidebar-copy">Gerencie seu capital.</p>
-        </div>
-
-        <nav class="sidebar-nav">
-            <a href="{{ url_for('dashboard') }}">
-                <span class="nav-icon">🏠</span> <span>Visão geral</span>
-            </a>
-            <a href="{{ url_for('cards') }}">
-                <span class="nav-icon">💳</span> <span>Cartão de crédito</span>
-            </a>
-            <a href="{{ url_for('balance') }}" class="active">
-                <span class="nav-icon">💰</span> <span>Saldo em conta</span>
-            </a>
-            <a href="{{ url_for('settings') }}">
-                <span class="nav-icon">⚙️</span> <span>Configurações</span>
-            </a>
-        </nav>
-        <a href="{{ url_for('auth.logout') }}" class="secondary-button full-width">
-             <span class="nav-icon">🚪</span> <span>Sair</span>
-        </a>
-    </aside>
+    
+    {% include '_sidebar.html' %}
 
     <main class="dashboard-main">
         <section class="panel-section">
-            <div class="section-header">
+            
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <p class="eyebrow">Gestão</p>
                     <h2>Saldo em conta</h2>
                 </div>
+                <button onclick="document.getElementById('form-nova-movimentacao').classList.toggle('hidden')" class="secondary-button" style="min-height: 40px; border-radius: 12px;">
+                    + Nova Movimentação
+                </button>
             </div>
 
-            <div class="two-column-grid">
-                <article class="glass-card">
-                    <h3>Conta principal</h3>
-                    <p class="section-copy">Sua conta principal para gerenciamento de entradas, saídas e reservas de capital.</p>
-                </article>
-
-                <article class="glass-card">
-                    <h3>Resumo do saldo</h3>
-                    <div class="summary-grid">
-                        {{ card_metrica('Saldo total', balance_snapshot.total_balance) }}
-                        {{ card_metrica('Saldo reservado', balance_snapshot.total_reserved) }}
-                    </div>
-                </article>
+            <div id="form-nova-movimentacao" class="hidden glass-card" style="margin-bottom: 24px; animation: fadeUp 0.3s ease;">
+                <h3>Registrar Movimentação</h3>
+                <form method="post" action="{{ url_for('balance_action') }}" class="form-grid">
+                    <label>
+                        <span>Ação</span>
+                        <select name="action_type">
+                            <option value="add">Adicionar saldo (+)</option>
+                            <option value="remove">Remover saldo (-)</option>
+                            <option value="reserve">Reservar saldo (Guardar)</option>
+                            <option value="unreserve">Liberar saldo reservado</option>
+                        </select>
+                    </label>
+                    <label><span>Valor (R$)</span><input type="number" step="0.01" min="0" name="amount" required></label>
+                    <label>
+                        <span>Categoria</span>
+                        <select name="category">
+                            {% for category in categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <label><span>Observação</span><input type="text" name="description" placeholder="Ex.: salário, aluguel"></label>
+                    <button type="submit" class="primary-button full-width" style="grid-column: 1 / -1;">Salvar movimentação</button>
+                </form>
             </div>
+
+            <article class="glass-card" style="margin-bottom: 24px;">
+                <h3>Resumo Global</h3>
+                <div class="summary-grid">
+                    {{ card_metrica('Saldo Total', balance_snapshot.total_balance) }}
+                    {{ card_metrica('Valor Reservado', balance_snapshot.total_reserved) }}
+                    {{ card_metrica('Saldo Livre', balance_snapshot.total_balance - balance_snapshot.total_reserved) }}
+                </div>
+            </article>
 
             <div class="card-list">
                 {% for account in balance_snapshot.accounts %}
@@ -92,27 +75,6 @@
                         {{ card_metrica('Adicionado (Histórico)', account.added) }}
                         {{ card_metrica('Saídas (Histórico)', account.spent) }}
                     </div>
-
-                    <form method="post" action="{{ url_for('balance_action') }}" class="form-grid compact-form">
-                        <label>
-                            <span>Ação</span>
-                            <select name="action_type">
-                                <option value="add">Adicionar saldo</option>
-                                <option value="remove">Remover saldo</option>
-                                <option value="reserve">Reservar saldo</option>
-                                <option value="unreserve">Liberar saldo reservado</option>
-                            </select>
-                        </label>
-                        <label><span>Valor</span><input type="number" step="0.01" min="0" name="amount" required></label>
-                        <label>
-                            <span>Categoria</span>
-                            <select name="category">
-                                {% for category in categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}
-                            </select>
-                        </label>
-                        <label><span>Observação</span><input type="text" name="description" placeholder="Ex.: salário, aluguel"></label>
-                        <button type="submit" class="primary-button full-width" style="grid-column: 1 / -1;">Salvar movimentação</button>
-                    </form>
                 </article>
                 {% endfor %}
             </div>

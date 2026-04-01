@@ -51,16 +51,25 @@ img { max-width: 100%; display: block; }
   50% { transform: translateY(-22px) translateX(12px) scale(1.05); }
 }
 
-/* --- Cartões Glassmorphism --- */
+/* --- Cartões Glassmorphism (ULTRA GLASS) --- */
 .glass-card, .glass-inner {
-  background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.07));
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.25); /* Reflexo de luz no topo */
+  border-left: 1px solid rgba(255,255,255,0.15); /* Reflexo de luz na lateral */
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4); /* Sombra mais difusa e profunda */
+  backdrop-filter: blur(24px); /* Desfoque mais intenso */
+  -webkit-backdrop-filter: blur(24px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
 }
 .glass-card { border-radius: var(--radius-xl); padding: 24px; }
 .glass-inner { border-radius: var(--radius-md); }
+
+/* Pequeno efeito de flutuação ao passar o mouse em cartões interativos */
+article.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 50px 0 rgba(0, 0, 0, 0.5);
+}
 
 /* --- UI Elements --- */
 .brand-chip, .decision-badge, .eyebrow {
@@ -230,6 +239,7 @@ img { max-width: 100%; display: block; }
 /* Em vez de 'display: none', escondemos reduzindo o tamanho e a opacidade */
 .sidebar:not(.expanded) .sidebar-title,
 .sidebar:not(.expanded) .sidebar-copy,
+.sidebar:not(.expanded) .sidebar-balance,
 .sidebar:not(.expanded) .sidebar-nav a span,
 .sidebar:not(.expanded) .secondary-button span {
   opacity: 0;
@@ -545,4 +555,44 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
   
   .form-grid, .compact-form { grid-template-columns: 1fr; }
   .flash-stack { left: 18px; right: 18px; }
+}
+
+/* --- Estilo Premium do Saldo na Sidebar --- */
+.sidebar-balance-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  transition: opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+}
+
+.balance-label {
+  font-size: 0.65rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+.balance-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--success);
+  letter-spacing: -0.5px; /* Deixa os números mais juntinhos e modernos */
+}
+
+/* Faz o saldo sumir perfeitamente quando a barra fecha */
+.sidebar:not(.expanded) .sidebar-balance-container,
+.sidebar:not(.expanded) .balance-label,
+.sidebar:not(.expanded) .balance-value {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border: none;
 }

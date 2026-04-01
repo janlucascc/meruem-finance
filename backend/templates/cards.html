@@ -61,17 +61,37 @@
                 </div>
             </div>
 
-            <div class="two-column-grid">
-                <article class="glass-card">
-                    <h3>Novo cartão</h3>
-                    <form method="post" action="{{ url_for('create_card') }}" enctype="multipart/form-data" class="form-grid">
-                        <label><span>Nome do cartão</span><input type="text" name="card_name" required></label>
-                        <label><span>Limite</span><input type="number" step="0.01" min="0" name="card_limit" required></label>
-                        <label><span>Dia do vencimento</span><input type="number" min="1" max="31" name="due_day" required></label>
-                        <label><span>Imagem</span><input type="file" name="card_image" accept="image/*"></label>
-                        <button type="submit" class="primary-button full-width" style="grid-column: 1 / -1;">Cadastrar cartão</button>
-                    </form>
-                </article>
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <p class="eyebrow">Gestão</p>
+                    <h2>Cartões de crédito</h2>
+                </div>
+                <button onclick="document.getElementById('form-novo-cartao').classList.toggle('hidden')" class="secondary-button" style="min-height: 40px; border-radius: 12px;">
+                    + Novo Cartão
+                </button>
+            </div>
+
+            <div id="form-novo-cartao" class="hidden glass-card" style="margin-bottom: 24px; animation: fadeUp 0.3s ease;">
+                <h3>Cadastrar novo cartão</h3>
+                <form method="post" action="{{ url_for('create_card') }}" enctype="multipart/form-data" class="form-grid">
+                    <label><span>Nome do cartão</span><input type="text" name="card_name" required></label>
+                    <label><span>Limite</span><input type="number" step="0.01" min="0" name="card_limit" required></label>
+                    <label><span>Dia do vencimento</span><input type="number" min="1" max="31" name="due_day" required></label>
+                    <label><span>Imagem</span><input type="file" name="card_image" accept="image/*"></label>
+                    <button type="submit" class="primary-button full-width" style="grid-column: 1 / -1;">Salvar cartão</button>
+                </form>
+            </div>
+
+            <article class="glass-card" style="margin-bottom: 24px;">
+                <h3>Resumo Global de Crédito</h3>
+                <div class="summary-grid">
+                    {{ card_metrica('Limite Total', card_snapshot.total_limit) }}
+                    
+                    {{ card_metrica('Comprometido (Gasto + Reserva)', card_snapshot.total_used + card_snapshot.total_reserved) }}
+                    
+                    {{ card_metrica('Limite Disponível', card_snapshot.total_limit - (card_snapshot.total_used + card_snapshot.total_reserved)) }}
+                </div>
+            </article>
 
                 <article class="glass-card">
                     <h3>Resumo do crédito</h3>
