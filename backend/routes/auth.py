@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
-from db import get_connection, get_user_by_email, get_user_by_id, update_user_password
+from db import get_connection, get_user_by_email, get_user_by_id, update_user_password, update_user_profile
 from mailer import send_email
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import re
@@ -49,8 +49,10 @@ def register():
     cursor.execute("""
         INSERT INTO balance_accounts (user_id, account_name, current_balance, reserved_balance)
         VALUES (%s, %s, %s, %s)
-    """, (user_id, "Conta principal", 0, 0))
+    """, (user_id, "Conta Principal", 0, 0))
+    
     conn.commit()
+    cursor.close() # <-- Fechando o cursor para liberar memória!
     conn.close()
 
     flash("Conta criada com sucesso. Agora faça login.", "success")
@@ -112,6 +114,27 @@ def change_password():
     flash("Senha alterada com sucesso!", "success")
     return redirect(url_for("settings"))
 
+@auth_bp.route("/update_profile", methods=["POST"])
+def update_profile():
+    if "user_id" not in session:
+        return redirect(url_for("home"))
+        
+    full_name = request.form.get("full_name", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    
+    if not full_name or not email:
+        flash("Nome e e-mail são obrigatórios.", "error")
+        return redirect(url_for("settings"))
+        
+    try:
+        update_user_profile(session["user_id"], full_name, email)
+        session["user_name"] = full_name # Atualiza o nome na barra lateral instantaneamente
+        flash("Perfil atualizado com sucesso!", "success")
+    except Exception as e:
+        flash("Erro ao atualizar. Este e-mail pode já estar em uso por outra conta.", "error")
+        
+    return redirect(url_for("settings"))
+
 # ==========================================
 # FLUXO DE RECUPERAÇÃO DE SENHA
 # ==========================================
@@ -139,7 +162,7 @@ def forgot_password():
             '''
             send_email(email, "Redefinição de Senha - MERUEM", html)
             
-        flash("Se o e-mail estiver cadastrado, enviámos um link de recuperação.", "success")
+        flash("Se o e-mail estiver cadastrado, enviamos um link de recuperação.", "success")
         return redirect(url_for("auth.forgot_password"))
         
     return render_template("forgot_password.html")

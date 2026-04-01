@@ -28,25 +28,39 @@
 
             <div id="form-nova-movimentacao" class="hidden glass-card" style="margin-bottom: 24px; animation: fadeUp 0.3s ease;">
                 <h3>Registrar Movimentação</h3>
-                <form method="post" action="{{ url_for('balance_action') }}" class="form-grid">
-                    <label>
-                        <span>Ação</span>
-                        <select name="action_type">
-                            <option value="add">Adicionar saldo (+)</option>
-                            <option value="remove">Remover saldo (-)</option>
-                            <option value="reserve">Reservar saldo (Guardar)</option>
-                            <option value="unreserve">Liberar saldo reservado</option>
-                        </select>
+                <form method="post" action="{{ url_for('balance_action') }}" class="form-grid compact-form" style="margin-top: 20px;">
+                    
+                    <label style="grid-column: 1 / -1;">
+                        <span>🎭 Ação Principal</span>
+                        <div class="category-scroll">
+                            <label class="category-chip"><input type="radio" name="action_type" value="add" required onchange="toggleAccountName()"><span>➕ Adicionar saldo</span></label>
+                            <label class="category-chip"><input type="radio" name="action_type" value="remove" required onchange="toggleAccountName()"><span>➖ Remover saldo</span></label>
+                            <label class="category-chip"><input type="radio" name="action_type" value="reserve" required onchange="toggleAccountName()"><span>🔒 Reservar saldo</span></label>
+                            <label class="category-chip"><input type="radio" name="action_type" value="unreserve" required onchange="toggleAccountName()"><span>🔓 Liberar reserva</span></label>
+                        </div>
                     </label>
-                    <label><span>Valor (R$)</span><input type="number" step="0.01" min="0" name="amount" required></label>
-                    <label>
-                        <span>Categoria</span>
-                        <select name="category">
-                            {% for category in categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}
-                        </select>
+
+                    <label><span>Valor (R$)</span><input type="number" step="0.01" min="0" name="amount" placeholder="0,00" required></label>
+
+                    <label id="account_name_wrapper" style="display: none;">
+                        <span>Nome da Conta (Opcional)</span>
+                        <input type="text" name="account_name" placeholder="Ex: Nubank, Carteira...">
                     </label>
-                    <label><span>Observação</span><input type="text" name="description" placeholder="Ex.: salário, aluguel"></label>
-                    <button type="submit" class="primary-button full-width" style="grid-column: 1 / -1;">Salvar movimentação</button>
+
+                    <label style="grid-column: 1 / -1;">
+                        <span>🏷️ Categoria (Opcional)</span>
+                        <div class="category-scroll uncheckable-radio">
+                            <label class="category-chip"><input type="radio" name="category" value="Moradia"><span>🏠 Moradia</span></label>
+                            <label class="category-chip"><input type="radio" name="category" value="Alimentação"><span>🍔 Alimentação</span></label>
+                            <label class="category-chip"><input type="radio" name="category" value="Transporte"><span>🚗 Transporte</span></label>
+                            <label class="category-chip"><input type="radio" name="category" value="Lazer"><span>🍿 Lazer</span></label>
+                            <label class="category-chip"><input type="radio" name="category" value="Emergência"><span>🚨 Emergência</span></label>
+                        </div>
+                    </label>
+
+                    <label style="grid-column: 1 / -1;"><span>Observação</span><input type="text" name="description" placeholder="Ex.: salário, aluguel, restaurante"></label>
+                    
+                    <button type="submit" class="primary-button" style="grid-column: 1 / -1;">Salvar Movimentação</button>
                 </form>
             </div>
 
@@ -125,4 +139,43 @@
         </section>
     </main>
 </div>
+
+<script>
+// 1. Mostrar/Esconder campo de "Nome da Conta"
+function toggleAccountName() {
+    const actionRadios = document.getElementsByName('action_type');
+    const accountNameWrapper = document.getElementById('account_name_wrapper');
+    let selectedAction = "";
+    
+    for (let radio of actionRadios) {
+        if (radio.checked) {
+            selectedAction = radio.value;
+            break;
+        }
+    }
+    
+    if (selectedAction === 'add') {
+        accountNameWrapper.style.display = 'block';
+    } else {
+        accountNameWrapper.style.display = 'none';
+    }
+}
+
+// 2. Permitir Desmarcar as Categorias
+document.addEventListener("DOMContentLoaded", function() {
+    let checkedRadios = {};
+    
+    document.querySelectorAll('.uncheckable-radio input[type="radio"]').forEach(radio => {
+        radio.addEventListener('click', function(e) {
+            let name = this.name;
+            if (checkedRadios[name] === this) {
+                this.checked = false;
+                checkedRadios[name] = null;
+            } else {
+                checkedRadios[name] = this;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

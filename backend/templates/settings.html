@@ -8,31 +8,40 @@
 
     <main class="dashboard-main" style="display: flex; justify-content: center; align-items: flex-start; padding-top: 20px;">
         <section class="panel-section" style="width: 100%; max-width: 520px;">
-            <div class="section-header" style="text-align: center; margin-bottom: 24px;">
-                <div>
-                    <p class="eyebrow">Segurança</p>
-                    <h2>Configurações da Conta</h2>
-                </div>
-            </div>
+    <div class="section-header" style="text-align: center; margin-bottom: 24px;">
+        <div>
+            <p class="eyebrow">Gestão de Perfil</p>
+            <h2>Configurações da Conta</h2>
+        </div>
+    </div>
 
-            <article class="glass-card">
-                <h3 style="text-align: center;">Mudar Senha</h3>
-                <p class="section-copy" style="margin-bottom: 24px; text-align: center;">Atualize sua senha de acesso ao painel MERUEM.</p>
-                
-                <form method="post" action="{{ url_for('auth.change_password') }}" class="form-grid" style="grid-template-columns: 1fr;">
-                    <label>
-                        <span>Senha Atual</span>
-                        <input type="password" name="current_password" required>
-                    </label>
-                    <label>
-                        <span>Nova Senha</span>
-                        <input type="password" name="new_password" required>
-                    </label>
-                    <label>
-                        <span>Confirmar Nova Senha</span>
-                        <input type="password" name="confirm_password" required>
-                    </label>
-                    <button type="submit" class="primary-button full-width" style="margin-top: 10px;">Atualizar Senha</button>
+    <article class="glass-card" style="margin-bottom: 20px;">
+        <h3 style="margin-bottom: 15px;">1. Mudar Nome</h3>
+        <form method="post" action="{{ url_for('auth.update_profile') }}" class="form-grid" style="grid-template-columns: 1fr;">
+            <label>
+                <input type="text" name="full_name" value="{{ user_name }}" required>
+            </label>
+            <button type="submit" class="secondary-button full-width">Atualizar Nome</button>
+        </form>
+    </article>
+
+    <article class="glass-card" style="margin-bottom: 20px;">
+        <h3 style="margin-bottom: 15px;">2. Mudar E-mail</h3>
+        <form method="post" action="{{ url_for('auth.update_profile') }}" class="form-grid" style="grid-template-columns: 1fr;">
+            <label>
+                <input type="email" name="email" placeholder="Digite seu novo e-mail" required>
+            </label>
+            <button type="submit" class="secondary-button full-width">Atualizar E-mail</button>
+        </form>
+    </article>
+
+    <article class="glass-card">
+        <h3 style="margin-bottom: 15px;">3. Mudar Senha</h3>
+        <form method="post" action="{{ url_for('auth.change_password') }}" class="form-grid" style="grid-template-columns: 1fr;">
+            <label><span>Senha Atual</span><input type="password" name="current_password" required></label>
+            <label><span>Nova Senha</span><input type="password" name="new_password" required></label>
+            <label><span>Confirmar Nova Senha</span><input type="password" name="confirm_password" required></label>
+            <button type="submit" class="primary-button full-width" style="margin-top: 10px;">Atualizar Senha</button>
                 </form>
             </article>
         </section>

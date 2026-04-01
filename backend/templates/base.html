@@ -23,9 +23,9 @@
         {% if messages %}
             <div class="flash-stack" id="flash-stack">
                 {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}">
+                    <div class="flash-message flash-{{ category }}" style="transition: opacity 0.5s ease, transform 0.5s ease;">
                         <span>{{ message }}</span>
-                        <button onclick="this.parentElement.style.display='none';" style="background:none; border:none; color:inherit; font-weight:bold; cursor:pointer; margin-left:15px;">✕</button>
+                        <button onclick="let el = this.parentElement; el.style.opacity='0'; setTimeout(() => el.remove(), 500);" style="background:none; border:none; color:inherit; font-weight:bold; cursor:pointer; margin-left:15px;">✕</button>
                     </div>
                 {% endfor %}
             </div>
@@ -37,14 +37,16 @@
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     
     <script>
-        setTimeout(function() {
-            let flashes = document.getElementById('flash-stack');
-            if(flashes) {
-                flashes.style.transition = "opacity 0.5s ease";
-                flashes.style.opacity = "0";
-                setTimeout(() => flashes.remove(), 500); // Remove do DOM após a animação
-            }
-        }, 5000); // 5000ms = 5 segundos
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                let flashMessages = document.querySelectorAll('.flash-message');
+                flashMessages.forEach(function(msg) {
+                    msg.style.opacity = "0";
+                    msg.style.transform = "translateY(-10px)";
+                    setTimeout(() => msg.remove(), 500); // Remove do DOM após a animação de meio segundo
+                });
+            }, 5000); // Começa a desaparecer após 5 segundos
+        });
     </script>
 </body>
 </html>

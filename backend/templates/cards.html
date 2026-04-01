@@ -26,13 +26,13 @@
                 </button>
             </div>
 
-            <div id="form-novo-cartao" class="hidden glass-card" style="margin-bottom: 24px; animation: fadeUp 0.3s ease;">
+            <div id="form-novo-cartao" class="hidden glass-card" style="margin-bottom: 24px;">
                 <h3>Cadastrar novo cartão</h3>
                 <form method="post" action="{{ url_for('create_card') }}" enctype="multipart/form-data" class="form-grid">
-                    <label><span>Nome do cartão</span><input type="text" name="card_name" required></label>
-                    <label><span>Limite</span><input type="number" step="0.01" min="0" name="card_limit" required></label>
-                    <label><span>Dia do vencimento</span><input type="number" min="1" max="31" name="due_day" required></label>
-                    <label><span>Imagem</span><input type="file" name="card_image" accept="image/*"></label>
+                    <label><span>Nome do cartão</span><input type="text" name="card_name" placeholder="Ex: Nubank, Itaú..." required></label>
+                    <label><span>Limite (R$)</span><input type="number" step="0.01" min="0" name="card_limit" placeholder="0,00" required></label>
+                    <label><span>Dia do vencimento</span><input type="number" min="1" max="31" name="due_day" placeholder="Ex: 15" required></label>
+                    <label><span>Imagem do Cartão (Opcional)</span><input type="file" name="card_image" accept="image/*"></label>
                     <button type="submit" class="primary-button full-width" style="grid-column: 1 / -1;">Salvar cartão</button>
                 </form>
             </div>
@@ -41,8 +41,8 @@
                 <h3>Resumo Global de Crédito</h3>
                 <div class="summary-grid">
                     {{ card_metrica('Limite Total', card_snapshot.total_limit) }}
-                    {{ card_metrica('Comprometido (Gasto + Reserva)', card_snapshot.total_used + card_snapshot.total_reserved) }}
-                    {{ card_metrica('Limite Disponível', card_snapshot.total_limit - (card_snapshot.total_used + card_snapshot.total_reserved)) }}
+                    {{ card_metrica('Comprometido', card_snapshot.total_used + card_snapshot.total_reserved) }}
+                    {{ card_metrica('Disponível', card_snapshot.total_limit - (card_snapshot.total_used + card_snapshot.total_reserved)) }}
                 </div>
             </article>
 
@@ -79,54 +79,86 @@
 
                     <div class="progress-shell">
                         <div class="progress-bar"><span style="width: {{ card.utilization }}%"></span></div>
-                        <small>{{ card.utilization }}% usado</small>
+                        <small>{{ card.utilization }}% do limite total usado</small>
                     </div>
 
-                    <form method="post" action="{{ url_for('card_action', card_id=card.id) }}" class="form-grid compact-form">
-                        <label>
-                            <span>Ação</span>
-                            <select name="action_type">
-                                <option value="use">Gasto (-)</option>
-                                <option value="pay">Pagar fatura (+)</option>
-                                <option value="reserve">Reservar limite</option>
-                                <option value="unreserve">Liberar reserva</option>
-                            </select>
-                        </label>
-                        <label><span>Valor</span><input type="number" step="0.01" name="amount" placeholder="0,00" required></label>
+                    <form method="post" action="{{ url_for('card_action', card_id=card.id) }}" class="form-grid compact-form" style="margin-top: 20px;">
                         
-                        <label>
-                            <span>Categoria</span>
-                            <select name="category">
-                                {% for category in categories %}
-                                    <option value="{{ category }}">{{ category }}</option>
-                                {% endfor %}
-                            </select>
+                        <label style="grid-column: 1 / -1;">
+                            <span>🎭 Ação Principal</span>
+                            <div class="category-scroll">
+                                <label class="category-chip"><input type="radio" name="action_type" value="use" required><span>🛒 Gasto (-)</span></label>
+                                <label class="category-chip"><input type="radio" name="action_type" value="pay" required><span>💵 Pagar fatura</span></label>
+                                <label class="category-chip"><input type="radio" name="action_type" value="reserve" required><span>🔒 Reservar limite</span></label>
+                            </div>
                         </label>
-                        <label><span>Observação</span><input type="text" name="description" placeholder="Ex: Mercado, Uber..."></label>
+
+                        <label><span>Valor (R$)</span><input type="number" step="0.01" name="amount" placeholder="0,00" required></label>
+                        <label><span>Observação</span><input type="text" name="description" placeholder="Ex: Mercado, Assinatura..."></label>
                         
+                        <label style="grid-column: 1 / -1;">
+                            <span>🏷️ Categoria (Opcional)</span>
+                            <div class="category-scroll uncheckable-radio">
+                                <label class="category-chip"><input type="radio" name="category" value="Moradia"><span>🏠 Moradia</span></label>
+                                <label class="category-chip"><input type="radio" name="category" value="Alimentação"><span>🍔 Alimentação</span></label>
+                                <label class="category-chip"><input type="radio" name="category" value="Transporte"><span>🚗 Transporte</span></label>
+                                <label class="category-chip"><input type="radio" name="category" value="Lazer"><span>🍿 Lazer</span></label>
+                                <label class="category-chip"><input type="radio" name="category" value="Emergência"><span>🚨 Emergência</span></label>
+                            </div>
+                        </label>
+
                         <button type="submit" class="primary-button" style="grid-column: 1 / -1;">Lançar Movimentação</button>
                     </form>
 
-                    <div class="mini-history" style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 15px;">
-                        <h4 style="font-size: 0.85rem; color: var(--text-soft); margin-bottom: 10px;">Histórico Recente</h4>
-                        <div style="display: grid; gap: 8px;">
-                            {% for tx in card.history[:5] %}
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px;">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 600;">{{ tx.action_type | action_name }}</span>
-                                    <small style="color: var(--text-soft); font-size: 0.7rem;">{{ tx.created_at | format_datetime }}</small>
+                    {% set reservas = card.history | selectattr('action_type', 'equalto', 'reserve') | list %}
+                    {% if reservas %}
+                    <div style="margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px;">
+                        <h4 style="font-size: 0.95rem; color: var(--accent); margin-bottom: 12px;">🔒 Minhas Reservas Ativas</h4>
+                        
+                        {% for res in reservas %}
+                        <div class="reserva-item" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <div class="reserva-item-info">
+                                    <strong>{{ res.description or 'Reserva s/ nome' }}</strong>
+                                    <span>R$ {{ res.amount | brl }} • {{ res.category }}</span>
                                 </div>
-                                {% if tx.action_type == 'pay' %}
-                                    <strong style="color: var(--success);">R$ {{ tx.amount | brl }}</strong>
-                                {% else %}
-                                    <strong>R$ {{ tx.amount | brl }}</strong>
-                                {% endif %}
+                                
+                                <div class="card-options">
+                                    <button type="button" class="options-trigger" onclick="toggleMenu('menu-res-{{ res.id }}')">⋮</button>
+                                    
+                                    <div class="options-menu hidden" id="menu-res-{{ res.id }}" style="right: 0; top: 30px; min-width: 150px; z-index: 10;">
+                                        <button type="button" onclick="document.getElementById('edit-res-{{ res.id }}').classList.toggle('hidden'); toggleMenu('menu-res-{{ res.id }}');" style="width: 100%; text-align: left; padding: 10px; background: none; border: none; color: var(--text); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);">✏️ Modificar</button>
+                                        
+                                        <form method="post" action="{{ url_for('release_reserve', tx_id=res.id) }}" onsubmit="return confirm('Tem certeza que deseja liberar esse valor? A reserva vai sumir.')">
+                                            <button type="submit" style="width: 100%; text-align: left; padding: 10px; background: none; border: none; color: var(--danger); cursor: pointer;">🔓 Liberar Valor</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                            {% else %}
-                            <small style="color: var(--text-soft);">Nenhum lançamento.</small>
-                            {% endfor %}
+
+                            <form id="edit-res-{{ res.id }}" method="post" action="{{ url_for('edit_reserve', tx_id=res.id) }}" class="hidden form-grid compact-form" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                                <label><span>Novo Valor (R$)</span><input type="number" step="0.01" name="amount" value="{{ res.amount }}" required></label>
+                                <label><span>Nova Observação</span><input type="text" name="description" value="{{ res.description }}"></label>
+                                <label>
+                                    <span>Nova Categoria</span>
+                                    <select name="category" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; width: 100%;">
+                                        <option value="Moradia" {% if res.category == 'Moradia' %}selected{% endif %}>🏠 Moradia</option>
+                                        <option value="Alimentação" {% if res.category == 'Alimentação' %}selected{% endif %}>🍔 Alimentação</option>
+                                        <option value="Transporte" {% if res.category == 'Transporte' %}selected{% endif %}>🚗 Transporte</option>
+                                        <option value="Lazer" {% if res.category == 'Lazer' %}selected{% endif %}>🍿 Lazer</option>
+                                        <option value="Emergência" {% if res.category == 'Emergência' %}selected{% endif %}>🚨 Emergência</option>
+                                        <option value="Geral" {% if res.category == 'Geral' %}selected{% endif %}>Geral</option>
+                                    </select>
+                                </label>
+                                <button type="submit" class="secondary-button full-width" style="margin-top: 5px;">Salvar Alterações</button>
+                            </form>
+                            
                         </div>
+                        {% endfor %}
                     </div>
+                    {% endif %}
+
                 </article>
                 {% endfor %}
             </div>
@@ -179,4 +211,22 @@
         </section>
     </main>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let checkedRadios = {};
+    
+    document.querySelectorAll('.uncheckable-radio input[type="radio"]').forEach(radio => {
+        radio.addEventListener('click', function(e) {
+            let name = this.name;
+            if (checkedRadios[name] === this) {
+                this.checked = false;
+                checkedRadios[name] = null;
+            } else {
+                checkedRadios[name] = this;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

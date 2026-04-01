@@ -2,10 +2,9 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
 def get_connection():
-    # Conecta ao Postgres
+    # A URL fica DENTRO da função para garantir que o app.py já carregou o .env
+    DATABASE_URL = os.environ.get("DATABASE_URL")
     conn = psycopg2.connect(DATABASE_URL)
     return conn
 
@@ -13,7 +12,7 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Tabela de Usuários (SERIAL no lugar de AUTOINCREMENT)
+    # Tabela de Usuários
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -91,6 +90,7 @@ def get_user_by_email(email):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
+    cursor.close()
     conn.close()
     return user
 
@@ -99,6 +99,7 @@ def get_user_by_id(user_id):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
     user = cursor.fetchone()
+    cursor.close()
     conn.close()
     return user
 
@@ -107,6 +108,7 @@ def get_user_balance_account(user_id):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM balance_accounts WHERE user_id = %s ORDER BY id DESC LIMIT 1", (user_id,))
     account = cursor.fetchone()
+    cursor.close()
     conn.close()
     return account
 
@@ -115,6 +117,7 @@ def get_user_cards(user_id):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM credit_cards WHERE user_id = %s ORDER BY id DESC", (user_id,))
     cards = cursor.fetchall()
+    cursor.close()
     conn.close()
     return cards
 
@@ -123,6 +126,7 @@ def get_balance_transactions(user_id):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM balance_transactions WHERE user_id = %s ORDER BY id DESC", (user_id,))
     rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return rows
 
@@ -137,6 +141,7 @@ def get_card_transactions(user_id):
         ORDER BY ct.id DESC
     """, (user_id,))
     rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return rows
 
@@ -145,6 +150,7 @@ def get_transactions_by_card(card_id, user_id):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM card_transactions WHERE card_id = %s AND user_id = %s ORDER BY id DESC", (card_id, user_id))
     rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return rows
 
@@ -154,6 +160,7 @@ def update_user_password(user_id, new_password_hash):
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_password_hash, user_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
 def update_user_image(user_id, filename):
@@ -161,6 +168,7 @@ def update_user_image(user_id, filename):
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET profile_image = %s WHERE id = %s", (filename, user_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
 def delete_card(card_id, user_id):
@@ -169,4 +177,13 @@ def delete_card(card_id, user_id):
     cursor.execute("DELETE FROM card_transactions WHERE card_id = %s AND user_id = %s", (card_id, user_id))
     cursor.execute("DELETE FROM credit_cards WHERE id = %s AND user_id = %s", (card_id, user_id))
     conn.commit()
+    cursor.close()
+    conn.close()
+
+def update_user_profile(user_id, full_name, email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET full_name = %s, email = %s WHERE id = %s", (full_name, email, user_id))
+    conn.commit()
+    cursor.close()
     conn.close()

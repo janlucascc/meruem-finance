@@ -277,3 +277,121 @@ select option { background-color: var(--bg); color: var(--text); }
   .form-grid, .compact-form { grid-template-columns: 1fr; }
   .hero-card h1, .topbar h1 { font-size: 2rem; }
 }
+/* Ajuste do tamanho e alinhamento dos Chips de Categoria e Ação */
+.category-chip {
+    display: inline-flex;
+    align-items: center; /* Alinha o círculo perfeitamente com o texto */
+    gap: 12px; /* Dá um respiro maior entre a bolinha e o emoji */
+    padding: 12px 20px; /* Deixa o botão mais "gordinho" e fácil de clicar (Ótimo para celular) */
+    border-radius: 30px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-soft);
+    font-size: 0.95rem; /* Aumenta um pouco a letra */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Ajuste fino no próprio círculo de seleção (radio button) */
+.category-chip input[type="radio"] {
+    margin: 0;
+    width: 20px; /* Bolinha maior para facilitar o clique */
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--accent); /* Pinta a bolinha com a cor do seu tema */
+}
+
+/* Design dos Botões que Expandem (Sanfona) */
+.custom-dropdown {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-bottom: 10px;
+}
+.custom-dropdown summary {
+    font-weight: 600;
+    color: var(--text);
+    list-style: none; /* Esconde a setinha padrão do HTML */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.custom-dropdown summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: var(--text-soft);
+}
+.custom-dropdown[open] summary::after { content: '▲'; }
+.custom-dropdown[open] { background: rgba(255, 255, 255, 0.06); }
+.custom-dropdown summary::-webkit-details-marker { display: none; }
+
+/* ========================================= */
+/* NOVO DESIGN: CARROSSEL HORIZONTAL (CHIPS) */
+/* ========================================= */
+.category-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-top: 8px;
+    /* Esconde a barra de rolagem mas mantém a função */
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+}
+.category-scroll::-webkit-scrollbar {
+    display: none; 
+}
+
+.category-chip {
+    flex-shrink: 0; /* Impede que o botão seja esmagado */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 30px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Esconde a bolinha padrão do radio para ficar com cara de botão */
+.category-chip input[type="radio"] {
+    display: none; 
+}
+
+/* Quando o botão está selecionado */
+.category-chip:has(input:checked) {
+    background: rgba(134, 242, 255, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.02);
+}
+
+/* ========================================= */
+/* DESIGN DOS CARDS DE RESERVA               */
+/* ========================================= */
+.reserva-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+.reserva-item-info strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+.reserva-item-info span {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+}
