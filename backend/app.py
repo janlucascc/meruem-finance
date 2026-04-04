@@ -22,11 +22,24 @@ from db import (
     get_card_transactions, delete_card, get_transactions_by_card, update_user_image
 )
 
-app = Flask(__name__)
+# ==========================================
+# CONFIGURAÇÃO DE PASTAS (O PADRÃO SÊNIOR)
+# ==========================================
+# 1. Descobre o caminho exato da pasta onde o app.py está rodando (pasta backend)
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Volta um nível (raiz do projeto) e aponta para a pasta frontend
+FRONTEND_DIR = os.path.join(os.path.dirname(BACKEND_DIR), 'frontend')
+
+# 3. Inicializa o Flask ensinando exatamente onde estão os arquivos visuais
+app = Flask(__name__, 
+            template_folder=os.path.join(FRONTEND_DIR, 'templates'), 
+            static_folder=os.path.join(FRONTEND_DIR, 'static'))
+
 app.secret_key = "meruem_secret_key_123"
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+# 4. Configuração de Uploads (Salva imagens dentro do frontend/static/uploads)
+UPLOAD_FOLDER = os.path.join(FRONTEND_DIR, "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
