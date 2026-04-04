@@ -4,3 +4,4 @@ __pycache__/
 backend/instance/*.db
 backend/static/uploads/*
 .env
+frontend/static/uploads/*
