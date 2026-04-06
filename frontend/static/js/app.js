@@ -69,3 +69,51 @@ document.addEventListener('click', function(e) {
         document.querySelectorAll('.options-menu').forEach(m => m.classList.add('hidden'));
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Apanhar os elementos
+    const lista = document.getElementById('transactions-list');
+    const itens = document.querySelectorAll('.transaction-item');
+    const btnExpandir = document.getElementById('btn-expand-tx');
+    const btnRecolher = document.getElementById('btn-collapse-tx');
+
+    // Se não existirem na página (por exemplo, se estivermos noutra página), paramos aqui
+    if (!lista || !btnExpandir || !btnRecolher) return;
+
+    // Configurações iniciais
+    const LIMITE_INICIAL = 3;
+    const INCREMENTO = 10;
+    let itensVisiveis = LIMITE_INICIAL;
+
+    function atualizarInterface() {
+        itens.forEach((item, index) => {
+            if (index < itensVisiveis) {
+                item.style.display = '';
+                // Um pequeno truque para a animação do CSS funcionar
+                setTimeout(() => item.style.opacity = '1', 50); 
+            } else {
+                item.style.opacity = '0';
+                item.style.display = 'none';
+            }
+        });
+
+        // Controlo dos botões
+        btnExpandir.style.display = (itensVisiveis < itens.length) ? 'inline-block' : 'none';
+        btnRecolher.style.display = (itensVisiveis > LIMITE_INICIAL) ? 'inline-block' : 'none';
+    }
+
+    // Ações dos cliques
+    btnExpandir.addEventListener('click', function() {
+        itensVisiveis += INCREMENTO;
+        atualizarInterface();
+    });
+
+    btnRecolher.addEventListener('click', function() {
+        itensVisiveis = LIMITE_INICIAL;
+        atualizarInterface();
+    });
+
+    // Iniciar
+    atualizarInterface();
+});

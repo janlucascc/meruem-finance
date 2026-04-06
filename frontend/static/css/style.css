@@ -395,3 +395,59 @@ select option { background-color: var(--bg); color: var(--text); }
     font-size: 0.85rem;
     color: var(--text-soft);
 }
+
+/* ========================================= */
+/* BOTÕES DA TABELA (ULTRA GLASS)            */
+/* ========================================= */
+
+.transactions-controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+#btn-expand-tx, #btn-collapse-tx {
+    /* Efeito Vidro */
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* Bordas suaves */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 30px;
+    
+    /* Tipografia e Espaçamento */
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent); /* Usa o seu azul neon */
+    
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Efeito ao passar o mouse (Hover) */
+#btn-expand-tx:hover, #btn-collapse-tx:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12); /* Fica um pouco mais "leitoso" */
+    border-color: var(--accent); /* Borda acende com a cor neon */
+    color: #ffffff; /* Texto brilha */
+    box-shadow: 0 8px 25px rgba(134, 242, 255, 0.15); /* Sombra neon sutil */
+}
+
+/* Efeito quando você passa o mouse por cima */
+#btn-expand-tx:hover, #btn-collapse-tx:hover {
+    background-color: #f3f4f6; /* Cinza clarinho ao passar o mouse */
+    border-color: #3b82f6; /* A borda fica azul */
+    transform: translateY(-2px); /* O botão "sobe" 2 pixels, dando profundidade */
+}
+
+/* Pequeno ajuste nos itens da lista para eles surgirem suavemente */
+.transaction-item {
+    transition: opacity 0.3s ease;
+    border-bottom: 1px solid #f9fafb; /* Linha divisória bem sutil */
+    padding: 12px 0;
+}

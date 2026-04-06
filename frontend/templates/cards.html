@@ -171,7 +171,7 @@
                     <h2>Histórico Global de Transações</h2>
                 </div>
             </div>
-            
+
             <div class="glass-card">
                 <div class="stats-table" style="overflow-x: auto;">
                     <table style="min-width: 600px;">
@@ -185,9 +185,10 @@
                                 <th>Valor</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="transactions-list">
                             {% for tx in card_history %}
-                            <tr>
+
+                            <tr class="transaction-item">
                                 <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
                                 <td><strong>{{ tx.card_name }}</strong></td>
                                 <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
@@ -201,12 +202,19 @@
                                     {% endif %}
                                 </td>
                             </tr>
+
                             {% else %}
                             <tr><td colspan="6" class="empty-state">Nenhuma transação registrada ainda.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+
+            </div class="transactions-controls">
+                <button id="btn-expand-tx" type="button"> Mostrar + </button>
+                <button id="btn-collapse-tx" type="button" style="display: none;"> Mostrar - </button>
+            </div>
+
             </div>
         </section>
     </main>
@@ -229,4 +237,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}

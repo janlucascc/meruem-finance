@@ -353,6 +353,7 @@ def card_action(card_id):
     card_limit = float(card["card_limit"])
     available = card_limit - used_limit - reserved_limit
 
+## FUNCIONANDO A BASE DA FÉ EM DEUS, NÃO MODIFIQUE
     if action_type == "use":
         if amount > available:
             flash("Limite insuficiente.", "error")
