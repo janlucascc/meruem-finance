@@ -152,9 +152,44 @@ input::placeholder { color: rgba(255,255,255,0.38); }
 input:focus, select:focus { border-color: rgba(134, 242, 255, 0.55); box-shadow: 0 0 0 4px rgba(134, 242, 255, 0.10); }
 select option { background-color: var(--bg); color: var(--text); }
 
-.primary-button { display: inline-flex; justify-content: center; align-items: center; min-height: 50px; border-radius: 16px; padding: 0 18px; font-weight: 700; color: #05101b; background: linear-gradient(135deg, var(--accent), #c8f7ff); border: none; cursor: pointer; }
-.secondary-button { display: inline-flex; justify-content: center; align-items: center; min-height: 50px; border-radius: 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: var(--text); cursor: pointer; }
-.primary-button:hover, .secondary-button:hover, .tab-button:hover { transform: translateY(-2px); }
+/* 1. Base comum para ambos os botões (Física e Layout) */
+.primary-button, .secondary-button { 
+    display: inline-flex; 
+    justify-content: center; 
+    align-items: center; 
+    min-height: 50px; 
+    border-radius: 16px; 
+    padding: 0 18px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    /* A Física de Borracha agora se aplica a todos! */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* 2. Cores exclusivas do Primário */
+.primary-button { 
+    color: #05101b; 
+    background: linear-gradient(135deg, var(--accent), #c8f7ff); 
+    border: none; 
+}
+
+/* 3. Cores exclusivas do Secundário (Glassmorphism) */
+.secondary-button {
+    background: rgba(255,255,255,0.08); 
+    border: 1px solid rgba(255,255,255,0.12); 
+    color: var(--text); 
+}
+
+body {
+    cursor: default;
+}
+
+/* 4. O Hover Correto (Apenas o brilho Neon, sem transform) */
+.primary-button:hover, .secondary-button:hover, .tab-button:hover { 
+    box-shadow: 0 8px 25px rgba(134, 242, 255, 0.2); 
+}
+
+/* 5. Utilitários */
 .inline-button { width: fit-content; }
 .full-width { width: 100%; }
 .hidden { display: none !important; }
@@ -450,4 +485,60 @@ select option { background-color: var(--bg); color: var(--text); }
     transition: opacity 0.3s ease;
     border-bottom: 1px solid #f9fafb; /* Linha divisória bem sutil */
     padding: 12px 0;
+}
+
+/* ========================================== */
+/* FILTRO GOOEY (EFEITO GELATINOSO/ORGÂNICO)  */
+/* ========================================== */
+
+/* Esta classe deve ser colocada no CONTAINER que segura os botões que vão se fundir */
+.gooey-container {
+    /* A Mágica: Desfoca tudo dentro do container e depois aumenta o contraste. 
+       Isso faz as bordas dos elementos "derreterem" umas nas outras. */
+    filter: url('#gooey-filter'); /* Referência ao SVG (opcional, para melhor suporte) */
+    -webkit-filter: blur(10px) contrast(20);
+    filter: blur(10px) contrast(20);
+    
+    /* Para não estragar a cor de fundo do seu site, precisamos isolar o container */
+    background: transparent;
+    mix-blend-mode: screen; 
+}
+
+/* Os itens dentro do container (que vão grudar) precisam perder a transparência 
+   por um momento para que o contraste funcione bem */
+.gooey-item {
+    background: var(--accent); /* Cor sólida para o efeito funcionar melhor */
+    border-radius: 50%; /* Bordas redondas grudam melhor */
+}
+
+/* Container que ativa a física de gelatina */
+.gooey-wrapper {
+    filter: url('#goo'); /* Chama o filtro SVG que criamos */
+    padding: 10px; /* Espaço para o efeito não cortar nas bordas */
+    margin: -10px; 
+    overflow: visible;
+}
+
+.category-chip {
+    /* Precisamos de uma cor sólida e sem transparência para o Gooey funcionar 100% */
+    background: #1a1f35; 
+    border: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 2;
+}
+
+/* Quando passamos o mouse, o chip aumenta e "puxa" a borda do vizinho */
+.category-chip:hover {
+    background: var(--accent);
+    color: #05101b;
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+/* Quando selecionado, ele brilha e se destaca na gelatina */
+.category-chip:has(input:checked) {
+    background: var(--accent);
+    color: #05101b;
+    box-shadow: 0 0 20px var(--accent);
 }

@@ -117,3 +117,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Iniciar
     atualizarInterface();
 });
+
+// ==========================================
+// EFEITO MAGNÉTICO E ORGÂNICO (Botões)
+// ==========================================
+document.addEventListener("DOMContentLoaded", function () {
+    // Seleciona os botões que terão o efeito elástico/magnético
+    const magneticButtons = document.querySelectorAll('.primary-button, .secondary-button, #btn-expand-tx, #btn-collapse-tx, .tab-button');
+
+    magneticButtons.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            // Calcula o centro do botão
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            // Aplica a força magnética (move o botão na direção do cursor)
+            // O multiplicador (0.3) define o quão "elástico" ele é. 
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px) scale(1.03)`;
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            // Quando o mouse sai, a mola solta e ele volta ao normal
+            btn.style.transform = 'translate(0px, 0px) scale(1)';
+        });
+    });
+});

@@ -86,10 +86,12 @@
                         
                         <label style="grid-column: 1 / -1;">
                             <span>🎭 Ação Principal</span>
-                            <div class="category-scroll">
-                                <label class="category-chip"><input type="radio" name="action_type" value="use" required><span>🛒 Gasto (-)</span></label>
-                                <label class="category-chip"><input type="radio" name="action_type" value="pay" required><span>💵 Pagar fatura</span></label>
-                                <label class="category-chip"><input type="radio" name="action_type" value="reserve" required><span>🔒 Reservar limite</span></label>
+                            <div class="gooey-wrapper">
+                                <div class="category-scroll">
+                                    <label class="category-chip"><input type="radio" name="action_type" value="use" required><span>🛒 Gasto (-)</span></label>
+                                    <label class="category-chip"><input type="radio" name="action_type" value="pay" required><span>💵 Pagar fatura</span></label>
+                                    <label class="category-chip"><input type="radio" name="action_type" value="reserve" required><span>🔒 Reservar limite</span></label>
+                                </div>
                             </div>
                         </label>
 
@@ -98,12 +100,14 @@
                         
                         <label style="grid-column: 1 / -1;">
                             <span>🏷️ Categoria (Opcional)</span>
-                            <div class="category-scroll uncheckable-radio">
-                                <label class="category-chip"><input type="radio" name="category" value="Moradia"><span>🏠 Moradia</span></label>
-                                <label class="category-chip"><input type="radio" name="category" value="Alimentação"><span>🍔 Alimentação</span></label>
-                                <label class="category-chip"><input type="radio" name="category" value="Transporte"><span>🚗 Transporte</span></label>
-                                <label class="category-chip"><input type="radio" name="category" value="Lazer"><span>🍿 Lazer</span></label>
-                                <label class="category-chip"><input type="radio" name="category" value="Emergência"><span>🚨 Emergência</span></label>
+                            <div class="gooey-wrapper">
+                                <div class="category-scroll uncheckable-radio">
+                                    <label class="category-chip"><input type="radio" name="category" value="Moradia"><span>🏠 Moradia</span></label>
+                                    <label class="category-chip"><input type="radio" name="category" value="Alimentação"><span>🍔 Alimentação</span></label>
+                                    <label class="category-chip"><input type="radio" name="category" value="Transporte"><span>🚗 Transporte</span></label>
+                                    <label class="category-chip"><input type="radio" name="category" value="Lazer"><span>🍿 Lazer</span></label>
+                                    <label class="category-chip"><input type="radio" name="category" value="Emergência"><span>🚨 Emergência</span></label>
+                                </div>
                             </div>
                         </label>
 
@@ -112,53 +116,33 @@
 
                     {% set reservas = card.history | selectattr('action_type', 'equalto', 'reserve') | list %}
                     {% if reservas %}
-                    <div style="margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px;">
+                    <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
                         <h4 style="font-size: 0.95rem; color: var(--accent); margin-bottom: 12px;">🔒 Minhas Reservas Ativas</h4>
-                        
                         {% for res in reservas %}
-                        <div class="reserva-item" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
-                            
+                        <div class="reserva-item">
                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 <div class="reserva-item-info">
                                     <strong>{{ res.description or 'Reserva s/ nome' }}</strong>
                                     <span>R$ {{ res.amount | brl }} • {{ res.category }}</span>
                                 </div>
-                                
                                 <div class="card-options">
                                     <button type="button" class="options-trigger" onclick="toggleMenu('menu-res-{{ res.id }}')">⋮</button>
-                                    
-                                    <div class="options-menu hidden" id="menu-res-{{ res.id }}" style="right: 0; top: 30px; min-width: 150px; z-index: 10;">
-                                        <button type="button" onclick="document.getElementById('edit-res-{{ res.id }}').classList.toggle('hidden'); toggleMenu('menu-res-{{ res.id }}');" style="width: 100%; text-align: left; padding: 10px; background: none; border: none; color: var(--text); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);">✏️ Modificar</button>
-                                        
-                                        <form method="post" action="{{ url_for('release_reserve', tx_id=res.id) }}" onsubmit="return confirm('Tem certeza que deseja liberar esse valor? A reserva vai sumir.')">
-                                            <button type="submit" style="width: 100%; text-align: left; padding: 10px; background: none; border: none; color: var(--danger); cursor: pointer;">🔓 Liberar Valor</button>
+                                    <div class="options-menu hidden" id="menu-res-{{ res.id }}">
+                                        <button type="button" onclick="document.getElementById('edit-res-{{ res.id }}').classList.toggle('hidden'); toggleMenu('menu-res-{{ res.id }}');" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
+                                        <form method="post" action="{{ url_for('release_reserve', tx_id=res.id) }}" onsubmit="return confirm('Liberar valor?')">
+                                            <button type="submit" class="delete-link">🔓 Liberar Valor</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
-
                             <form id="edit-res-{{ res.id }}" method="post" action="{{ url_for('edit_reserve', tx_id=res.id) }}" class="hidden form-grid compact-form" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                                <label><span>Novo Valor (R$)</span><input type="number" step="0.01" name="amount" value="{{ res.amount }}" required></label>
-                                <label><span>Nova Observação</span><input type="text" name="description" value="{{ res.description }}"></label>
-                                <label>
-                                    <span>Nova Categoria</span>
-                                    <select name="category" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; width: 100%;">
-                                        <option value="Moradia" {% if res.category == 'Moradia' %}selected{% endif %}>🏠 Moradia</option>
-                                        <option value="Alimentação" {% if res.category == 'Alimentação' %}selected{% endif %}>🍔 Alimentação</option>
-                                        <option value="Transporte" {% if res.category == 'Transporte' %}selected{% endif %}>🚗 Transporte</option>
-                                        <option value="Lazer" {% if res.category == 'Lazer' %}selected{% endif %}>🍿 Lazer</option>
-                                        <option value="Emergência" {% if res.category == 'Emergência' %}selected{% endif %}>🚨 Emergência</option>
-                                        <option value="Geral" {% if res.category == 'Geral' %}selected{% endif %}>Geral</option>
-                                    </select>
-                                </label>
-                                <button type="submit" class="secondary-button full-width" style="margin-top: 5px;">Salvar Alterações</button>
+                                <label class="full-width"><span>Novo Valor</span><input type="number" step="0.01" name="amount" value="{{ res.amount }}" required></label>
+                                <button type="submit" class="secondary-button full-width">Salvar</button>
                             </form>
-                            
                         </div>
                         {% endfor %}
                     </div>
                     {% endif %}
-
                 </article>
                 {% endfor %}
             </div>
@@ -174,10 +158,10 @@
 
             <div class="glass-card">
                 <div class="stats-table" style="overflow-x: auto;">
-                    <table style="min-width: 600px;">
+                    <table>
                         <thead>
                             <tr>
-                                <th>Data e Hora</th>
+                                <th>Data</th>
                                 <th>Cartão</th>
                                 <th>Ação</th>
                                 <th>Categoria</th>
@@ -187,7 +171,6 @@
                         </thead>
                         <tbody id="transactions-list">
                             {% for tx in card_history %}
-
                             <tr class="transaction-item">
                                 <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
                                 <td><strong>{{ tx.card_name }}</strong></td>
@@ -195,35 +178,43 @@
                                 <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
                                 <td>{{ tx.description or '-' }}</td>
                                 <td>
-                                    {% if tx.action_type in ['pay', 'unreserve'] %}
-                                        <strong style="color: var(--success);">R$ {{ tx.amount | brl }}</strong>
-                                    {% else %}
-                                        <strong>R$ {{ tx.amount | brl }}</strong>
-                                    {% endif %}
+                                    <strong style="color: {% if tx.action_type in ['pay', 'unreserve'] %}var(--success){% else %}var(--text){% endif %};">
+                                        R$ {{ tx.amount | brl }}
+                                    </strong>
                                 </td>
                             </tr>
-
                             {% else %}
-                            <tr><td colspan="6" class="empty-state">Nenhuma transação registrada ainda.</td></tr>
+                            <tr><td colspan="6" class="empty-state">Nenhuma transação registrada.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-
-            </div class="transactions-controls">
-                <button id="btn-expand-tx" type="button"> Mostrar + </button>
-                <button id="btn-collapse-tx" type="button" style="display: none;"> Mostrar - </button>
-            </div>
-
+                
+                <div class="transactions-controls">
+                    <button id="btn-expand-tx" type="button"> Mostrar + </button>
+                    <button id="btn-collapse-tx" type="button" style="display: none;"> Mostrar - </button>
+                </div>
             </div>
         </section>
     </main>
 </div>
 
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display:none;">
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo" />
+        <feBlend in="SourceGraphic" in2="goo" />
+      </filter>
+    </defs>
+</svg>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
 <script>
+// Mantendo sua lógica de rádio desmarcável
 document.addEventListener("DOMContentLoaded", function() {
     let checkedRadios = {};
-    
     document.querySelectorAll('.uncheckable-radio input[type="radio"]').forEach(radio => {
         radio.addEventListener('click', function(e) {
             let name = this.name;
@@ -237,6 +228,4 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
-
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}
