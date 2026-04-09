@@ -353,7 +353,6 @@ def card_action(card_id):
     card_limit = float(card["card_limit"])
     available = card_limit - used_limit - reserved_limit
 
-## FUNCIONANDO A BASE DA FÉ EM DEUS, NÃO MODIFIQUE
     if action_type == "use":
         if amount > available:
             flash("Limite insuficiente.", "error")
@@ -453,9 +452,112 @@ def edit_reserve(tx_id):
     conn.close()
     return redirect(url_for("cards"))
 
+@app.route('/transaction/<int:tx_id>/delete', methods=['POST'])
+@login_required
+def delete_transaction(tx_id):
+    user_id = session["user_id"]
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # 1. Busca a transação para saber qual foi o cartão, a ação e o valor
+        cursor.execute("SELECT card_id, action_type, amount FROM card_transactions WHERE id = %s AND user_id = %s", (tx_id, user_id))
+        tx = cursor.fetchone()
+
+        if not tx:
+            flash("Transação não encontrada.", "error")
+            return redirect(url_for("cards"))
+
+        card_id = tx[0]
+        action_type = tx[1]
+        amount = float(tx[2])
+
+        # 2. A MATEMÁTICA REVERSA DIRETO NO BANCO DE DADOS
+        if action_type == 'use':
+            cursor.execute("UPDATE credit_cards SET used_limit = GREATEST(0, used_limit - %s) WHERE id = %s", (amount, card_id))
+        elif action_type == 'pay':
+            cursor.execute("UPDATE credit_cards SET used_limit = used_limit + %s WHERE id = %s", (amount, card_id))
+        elif action_type == 'reserve':
+            cursor.execute("UPDATE credit_cards SET reserved_limit = GREATEST(0, reserved_limit - %s) WHERE id = %s", (amount, card_id))
+        elif action_type == 'unreserve':
+            cursor.execute("UPDATE credit_cards SET reserved_limit = reserved_limit + %s WHERE id = %s", (amount, card_id))
+
+        # 3. Apaga o registro da transação
+        cursor.execute("DELETE FROM card_transactions WHERE id = %s", (tx_id,))
+        
+        # 4. Salva (Commit)
+        conn.commit()
+        flash("Transação removida e saldo recalculado com sucesso!", "success")
+
+    except Exception as e:
+        conn.rollback() # Se der erro, desfaz tudo para não corromper o saldo
+        flash("Ocorreu um erro ao apagar a transação.", "error")
+        print(f"Erro ao deletar tx: {e}")
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for('cards'))
+
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+@app.route('/balance/transaction/<int:tx_id>/delete', methods=['POST'])
+@login_required
+def delete_balance_transaction(tx_id):
+    user_id = session["user_id"]
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # 1. Busca a transação de saldo
+        cursor.execute("SELECT account_id, action_type, amount FROM balance_transactions WHERE id = %s AND user_id = %s", (tx_id, user_id))
+        tx = cursor.fetchone()
+
+        if not tx:
+            flash("Transação não encontrada.", "error")
+            return redirect(url_for("balance"))
+
+        account_id = tx[0]
+        action_type = tx[1]
+        amount = float(tx[2])
+
+        # 2. A MATEMÁTICA REVERSA DA CONTA
+        if action_type == 'add':
+            # Se apagou uma entrada de dinheiro, o saldo diminui
+            cursor.execute("UPDATE balance_accounts SET current_balance = current_balance - %s WHERE id = %s", (amount, account_id))
+            
+        elif action_type == 'remove':
+            # Se apagou uma saída (gasto), o dinheiro "volta" pra conta
+            cursor.execute("UPDATE balance_accounts SET current_balance = current_balance + %s WHERE id = %s", (amount, account_id))
+            
+        elif action_type == 'reserve':
+            # Se apagou uma reserva, o dinheiro guardado diminui
+            cursor.execute("UPDATE balance_accounts SET reserved_balance = GREATEST(0, reserved_balance - %s) WHERE id = %s", (amount, account_id))
+            
+        elif action_type == 'unreserve':
+            # Se apagou um resgate de reserva, o dinheiro volta a ficar guardado
+            cursor.execute("UPDATE balance_accounts SET reserved_balance = reserved_balance + %s WHERE id = %s", (amount, account_id))
+
+        # 3. Apaga a transação do histórico
+        cursor.execute("DELETE FROM balance_transactions WHERE id = %s", (tx_id,))
+        
+        # 4. Salva a operação
+        conn.commit()
+        flash("Transação removida e saldo da conta recalculado!", "success")
+
+    except Exception as e:
+        conn.rollback() # Previne corrupção de saldo
+        flash("Ocorreu um erro ao apagar a movimentação.", "error")
+        print(f"Erro ao deletar tx de saldo: {e}")
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for('balance'))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

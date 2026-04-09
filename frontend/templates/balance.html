@@ -95,47 +95,66 @@
         </section>
 
         <section class="panel-section" style="margin-top: 32px;">
-            <div class="section-header">
-                <div>
-                    <p class="eyebrow">Registros</p>
-                    <h2>Histórico de Transações</h2>
-                </div>
+    <div class="section-header">
+        <div>
+            <p class="eyebrow">Registros</p>
+            <h2>Histórico Global da Conta</h2>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="stats-table" style="overflow-x: auto;">
+            <table style="min-width: 600px;">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Ação</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th style="text-align: right;">Opções</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-list">
+                    {% for tx in balance_history %}
+                    
+                    <tr class="transaction-item">
+                        <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
+                        <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
+                        <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
+                        <td>{{ tx.description or '-' }}</td>
+                        <td>
+                            <strong style="color: {% if tx.action_type in ['add', 'unreserve'] %}var(--success){% else %}var(--text){% endif %};">
+                                R$ {{ tx.amount | brl }}
+                            </strong>
+                        </td>
+                        
+                        <td style="text-align: right; position: relative;">
+                            <div class="card-options" style="position: static;">
+                                <button type="button" class="options-trigger" onclick="toggleMenu('menu-bal-tx-{{ tx.id }}')">⋮</button>
+                                
+                                <div class="options-menu hidden" id="menu-bal-tx-{{ tx.id }}" style="right: 20px; top: 30px; min-width: 150px; z-index: 50; text-align: left;">
+                                    <button type="button" onclick="alert('Edição em breve!')" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
+                                    
+                                    <form method="post" action="{{ url_for('delete_balance_transaction', tx_id=tx.id) }}" onsubmit="return confirm('Tem certeza que deseja apagar? O saldo da sua conta será recalculado.')">
+                                        <button type="submit" class="delete-link">🗑️ Apagar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6" class="empty-state">Nenhuma movimentação registrada.</td></tr>
+                        {% endfor %}
+                     </tbody>
+                 </table>
             </div>
-            
-            <div class="glass-card">
-                <div class="stats-table" style="overflow-x: auto;">
-                    <table style="min-width: 600px;">
-                        <thead>
-                            <tr>
-                                <th>Data e Hora</th>
-                                <th>Ação</th>
-                                <th>Categoria</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for tx in balance_history %}
-                            <tr>
-                                <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
-                                <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
-                                <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
-                                <td>{{ tx.description or '-' }}</td>
-                                <td>
-                                    {% if tx.action_type in ['remove', 'reserve'] %}
-                                        <strong style="color: var(--danger);">- R$ {{ tx.amount | brl }}</strong>
-                                    {% else %}
-                                        <strong style="color: var(--success);">+ R$ {{ tx.amount | brl }}</strong>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="5" class="empty-state">Nenhuma transação registrada ainda.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        
+             <div class="transactions-controls">
+                    <button id="btn-expand-tx" type="button"> Mostrar + </button>
+                    <button id="btn-collapse-tx" type="button" style="display: none;"> Mostrar - </button>
+                 </div>
+             </div>
         </section>
     </main>
 </div>

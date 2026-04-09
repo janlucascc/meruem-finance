@@ -158,35 +158,52 @@
 
             <div class="glass-card">
                 <div class="stats-table" style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Cartão</th>
-                                <th>Ação</th>
-                                <th>Categoria</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactions-list">
-                            {% for tx in card_history %}
-                            <tr class="transaction-item">
-                                <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
-                                <td><strong>{{ tx.card_name }}</strong></td>
-                                <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
-                                <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
-                                <td>{{ tx.description or '-' }}</td>
-                                <td>
-                                    <strong style="color: {% if tx.action_type in ['pay', 'unreserve'] %}var(--success){% else %}var(--text){% endif %};">
-                                        R$ {{ tx.amount | brl }}
-                                    </strong>
-                                </td>
-                            </tr>
+                   <table style="min-width: 600px;">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Cartão</th>
+            <th>Ação</th>
+            <th>Categoria</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th style="text-align: right;">Opções</th> 
+        </tr>
+    </thead>
+    <tbody id="transactions-list">
+        {% for tx in card_history %}
+        <tr class="transaction-item">
+            <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
+            <td><strong>{{ tx.card_name }}</strong></td>
+            <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
+            <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
+            <td>{{ tx.description or '-' }}</td>
+            <td>
+                <strong style="color: {% if tx.action_type in ['pay', 'unreserve'] %}var(--success){% else %}var(--text){% endif %};">
+                    R$ {{ tx.amount | brl }}
+                </strong>
+            </td>
+            
+            <td style="text-align: right; position: relative;">
+                <div class="card-options" style="position: static;">
+                    <button type="button" class="options-trigger" onclick="toggleMenu('menu-tx-{{ tx.id }}')">⋮</button>
+                    
+                    <div class="options-menu hidden" id="menu-tx-{{ tx.id }}" style="right: 20px; top: 30px; min-width: 150px; z-index: 50; text-align: left;">
+                        
+                        <button type="button" onclick="alert('Edição em breve!')" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
+                        
+                        <form method="post" action="{{ url_for('delete_transaction', tx_id=tx.id) }}" onsubmit="return confirm('Tem certeza que deseja apagar? Isso vai recalcular o saldo do seu cartão.')">
+                            <button type="submit" class="delete-link">🗑️ Apagar</button>
+                        </form>
+                        
+                                         </div>
+                                     </div>
+                                 </td>
+                             </tr>
                             {% else %}
-                            <tr><td colspan="6" class="empty-state">Nenhuma transação registrada.</td></tr>
+                            <tr><td colspan="7" class="empty-state">Nenhuma transação registrada.</td></tr>
                             {% endfor %}
-                        </tbody>
+                         </tbody>
                     </table>
                 </div>
                 
