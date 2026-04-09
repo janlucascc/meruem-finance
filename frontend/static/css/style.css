@@ -639,7 +639,7 @@ body {
     transition: background 0.3s ease;
 }
 
-/* Um hover sutil no estilo Glassmorphism para os pontinhos */
+/* Um hover sutil no Glassmorphism para os pontinhos */
 .reserva-item .options-trigger:hover {
     background: rgba(255, 255, 255, 0.1);
 }

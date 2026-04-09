@@ -593,7 +593,7 @@ def edit_transaction(tx_id):
         card = cursor.fetchone()
         available = float(card[0]) - float(card[1]) - float(card[2])
 
-        # 3. Matemática Reversa Inteligente
+        # 3. Matemática Reversa Inteligente (MRI)
         if action_type == 'use':
             if diff > available:
                 flash("Limite insuficiente para aumentar este gasto.", "error")
