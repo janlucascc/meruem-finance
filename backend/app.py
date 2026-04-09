@@ -559,5 +559,75 @@ def delete_balance_transaction(tx_id):
 
     return redirect(url_for('balance'))
 
+@app.route('/transaction/<int:tx_id>/edit', methods=['POST'])
+@login_required
+def edit_transaction(tx_id):
+    user_id = session["user_id"]
+    new_amount_raw = request.form.get("amount", "").strip()
+    new_desc = request.form.get("description", "").strip()
+    new_cat = request.form.get("category", "Geral").strip()
+
+    try:
+        new_amount = float(new_amount_raw.replace(",", "."))
+    except ValueError:
+        flash("Valor inválido.", "error")
+        return redirect(url_for("cards"))
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # 1. Pega os dados originais da transação
+        cursor.execute("SELECT card_id, action_type, amount FROM card_transactions WHERE id = %s AND user_id = %s", (tx_id, user_id))
+        tx = cursor.fetchone()
+
+        if not tx:
+            flash("Transação não encontrada.", "error")
+            return redirect(url_for("cards"))
+
+        card_id, action_type, old_amount = tx[0], tx[1], float(tx[2])
+        diff = new_amount - old_amount # A diferença que precisa ser compensada
+
+        # 2. Pega os limites do cartão para garantir que a edição não estoure o limite
+        cursor.execute("SELECT card_limit, used_limit, reserved_limit FROM credit_cards WHERE id = %s", (card_id,))
+        card = cursor.fetchone()
+        available = float(card[0]) - float(card[1]) - float(card[2])
+
+        # 3. Matemática Reversa Inteligente
+        if action_type == 'use':
+            if diff > available:
+                flash("Limite insuficiente para aumentar este gasto.", "error")
+                return redirect(url_for("cards"))
+            cursor.execute("UPDATE credit_cards SET used_limit = GREATEST(0, used_limit + %s) WHERE id = %s", (diff, card_id))
+            
+        elif action_type == 'pay':
+            cursor.execute("UPDATE credit_cards SET used_limit = GREATEST(0, used_limit - %s) WHERE id = %s", (diff, card_id))
+            
+        elif action_type == 'reserve':
+            if diff > available:
+                flash("Limite insuficiente para aumentar esta reserva.", "error")
+                return redirect(url_for("cards"))
+            cursor.execute("UPDATE credit_cards SET reserved_limit = GREATEST(0, reserved_limit + %s) WHERE id = %s", (diff, card_id))
+            
+        elif action_type == 'unreserve':
+            cursor.execute("UPDATE credit_cards SET reserved_limit = GREATEST(0, reserved_limit - %s) WHERE id = %s", (diff, card_id))
+
+        # 4. Atualiza os dados de texto da transação
+        cursor.execute("UPDATE card_transactions SET amount = %s, description = %s, category = %s WHERE id = %s", (new_amount, new_desc, new_cat, tx_id))
+        
+        conn.commit()
+        flash("Transação atualizada com sucesso!", "success")
+        
+    except Exception as e:
+        conn.rollback()
+        flash("Erro ao atualizar transação.", "error")
+        print(f"Erro ao editar tx: {e}")
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("cards"))
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

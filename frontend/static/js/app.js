@@ -143,3 +143,34 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+// ==========================================
+// CONTROLE DO MODAL DE EDIÇÃO
+// ==========================================
+function openEditModal(actionUrl, amount, desc, cat) {
+    const modal = document.getElementById('edit-modal');
+    
+    // Preenche o formulário com os dados atuais
+    document.getElementById('edit-form').action = actionUrl;
+    document.getElementById('edit-amount').value = amount;
+    document.getElementById('edit-desc').value = (desc && desc !== 'None') ? desc : '';
+    document.getElementById('edit-cat').value = (cat && cat !== 'None') ? cat : 'Geral';
+    
+    // Mostra o modal com animação
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('edit-modal');
+    modal.classList.remove('active');
+    setTimeout(() => modal.classList.add('hidden'), 300); // Aguarda o CSS terminar de sumir
+}
+
+// Fecha menus suspensos ao clicar fora
+document.addEventListener('click', function(e) {
+    // Se o clique não foi no botão de 3 pontos E não foi DENTRO de um menu já aberto
+    if (!e.target.classList.contains('options-trigger') && !e.target.closest('.options-menu')) {
+        document.querySelectorAll('.options-menu').forEach(m => m.classList.add('hidden'));
+    }
+});

@@ -542,3 +542,112 @@ body {
     color: #05101b;
     box-shadow: 0 0 20px var(--accent);
 }
+
+/* ========================================== */
+/* MODAL DE EDIÇÃO (GLASSMORPHISM)            */
+/* ========================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0; /* Cobre a tela toda */
+    background: rgba(5, 7, 14, 0.7); /* Fundo escuro semitransparente */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-overlay .glass-card {
+    width: 90%;
+    max-width: 400px;
+    transform: translateY(30px); /* Começa um pouco para baixo */
+    /* A mesma física de mola (Luffy) que usamos nos botões! */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.active .glass-card {
+    transform: translateY(0); /* Sobe para o centro */
+}
+
+/* Botão de Fechar o Modal */
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-soft);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+/* ==========================================
+   FIX: MENU SUSPENSO (GLASSMORPHISM) & ALINHAMENTO
+   ========================================== */
+.reserva-item {
+    overflow: visible !important;
+}
+
+/* 1. Transforma o container das opções em Flex para alinhar o botão no centro exato do eixo Y */
+.reserva-item .card-options {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Garante que preencha a altura da linha para alinhar com o texto */
+    margin: 0;
+    top: auto; 
+    right: auto;
+}
+
+/* 2. Reseta o botão dos 3 pontinhos para uma forma perfeitamente simétrica */
+.reserva-item .options-trigger {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    color: var(--text, #fff);
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.3s ease;
+}
+
+/* Um hover sutil no estilo Glassmorphism para os pontinhos */
+.reserva-item .options-trigger:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.reserva-item .options-menu {
+    position: absolute;
+    top: 40px; /* Desloca o menu elegantemente para baixo do botão centralizado */
+    right: 0;
+    z-index: 9999 !important;
+    min-width: 160px;
+}

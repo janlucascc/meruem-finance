@@ -114,36 +114,42 @@
                         <button type="submit" class="primary-button" style="grid-column: 1 / -1;">Lançar Movimentação</button>
                     </form>
 
-                    {% set reservas = card.history | selectattr('action_type', 'equalto', 'reserve') | list %}
-                    {% if reservas %}
+                    {% set ns = namespace(has_reserves=false) %}
+                    {% for tx in card.history %}
+                        {% if tx['action_type'] == 'reserve' %}
+                            {% set ns.has_reserves = true %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if ns.has_reserves %}
                     <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
                         <h4 style="font-size: 0.95rem; color: var(--accent); margin-bottom: 12px;">🔒 Minhas Reservas Ativas</h4>
-                        {% for res in reservas %}
-                        <div class="reserva-item">
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <div class="reserva-item-info">
-                                    <strong>{{ res.description or 'Reserva s/ nome' }}</strong>
-                                    <span>R$ {{ res.amount | brl }} • {{ res.category }}</span>
-                                </div>
-                                <div class="card-options">
-                                    <button type="button" class="options-trigger" onclick="toggleMenu('menu-res-{{ res.id }}')">⋮</button>
-                                    <div class="options-menu hidden" id="menu-res-{{ res.id }}">
-                                        <button type="button" onclick="document.getElementById('edit-res-{{ res.id }}').classList.toggle('hidden'); toggleMenu('menu-res-{{ res.id }}');" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
-                                        <form method="post" action="{{ url_for('release_reserve', tx_id=res.id) }}" onsubmit="return confirm('Liberar valor?')">
-                                            <button type="submit" class="delete-link">🔓 Liberar Valor</button>
-                                        </form>
+                        
+                        {% for res in card.history %}
+                            {% if res['action_type'] == 'reserve' %}
+                            <div class="reserva-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div class="reserva-item-info">
+                                        <strong>{{ res['description'] or 'Reserva s/ nome' }}</strong>
+                                        <span>R$ {{ res['amount'] | brl }} • {{ res['category'] }}</span>
+                                    </div>
+                                    
+                                    <div class="card-options">
+                                        <button type="button" class="options-trigger" onclick="toggleMenu('menu-res-{{ res['id'] }}')">⋮</button>
+                                        <div class="options-menu hidden" id="menu-res-{{ res['id'] }}">
+                                            <button type="button" onclick="openEditModal('{{ url_for('edit_reserve', tx_id=res['id']) }}', '{{ res['amount'] }}', '{{ res['description'] }}', '{{ res['category'] }}'); toggleMenu('menu-res-{{ res['id'] }}');" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
+                                            <form method="post" action="{{ url_for('release_reserve', tx_id=res['id']) }}" onsubmit="return confirm('Liberar valor?')">
+                                                <button type="submit" class="delete-link">🔓 Liberar Valor</button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <form id="edit-res-{{ res.id }}" method="post" action="{{ url_for('edit_reserve', tx_id=res.id) }}" class="hidden form-grid compact-form" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                                <label class="full-width"><span>Novo Valor</span><input type="number" step="0.01" name="amount" value="{{ res.amount }}" required></label>
-                                <button type="submit" class="secondary-button full-width">Salvar</button>
-                            </form>
-                        </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                     {% endif %}
-                </article>
+                    </article>
                 {% endfor %}
             </div>
         </section>
@@ -159,51 +165,49 @@
             <div class="glass-card">
                 <div class="stats-table" style="overflow-x: auto;">
                    <table style="min-width: 600px;">
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Cartão</th>
-            <th>Ação</th>
-            <th>Categoria</th>
-            <th>Descrição</th>
-            <th>Valor</th>
-            <th style="text-align: right;">Opções</th> 
-        </tr>
-    </thead>
-    <tbody id="transactions-list">
-        {% for tx in card_history %}
-        <tr class="transaction-item">
-            <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
-            <td><strong>{{ tx.card_name }}</strong></td>
-            <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
-            <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
-            <td>{{ tx.description or '-' }}</td>
-            <td>
-                <strong style="color: {% if tx.action_type in ['pay', 'unreserve'] %}var(--success){% else %}var(--text){% endif %};">
-                    R$ {{ tx.amount | brl }}
-                </strong>
-            </td>
-            
-            <td style="text-align: right; position: relative;">
-                <div class="card-options" style="position: static;">
-                    <button type="button" class="options-trigger" onclick="toggleMenu('menu-tx-{{ tx.id }}')">⋮</button>
-                    
-                    <div class="options-menu hidden" id="menu-tx-{{ tx.id }}" style="right: 20px; top: 30px; min-width: 150px; z-index: 50; text-align: left;">
-                        
-                        <button type="button" onclick="alert('Edição em breve!')" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
-                        
-                        <form method="post" action="{{ url_for('delete_transaction', tx_id=tx.id) }}" onsubmit="return confirm('Tem certeza que deseja apagar? Isso vai recalcular o saldo do seu cartão.')">
-                            <button type="submit" class="delete-link">🗑️ Apagar</button>
-                        </form>
-                        
-                                         </div>
-                                     </div>
-                                 </td>
-                             </tr>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cartão</th>
+                                <th>Ação</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th style="text-align: right;">Opções</th> 
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-list">
+                            {% for tx in card_history %}
+                            <tr class="transaction-item">
+                                <td style="color: var(--text-soft);">{{ tx.created_at | format_datetime }}</td>
+                                <td><strong>{{ tx.card_name }}</strong></td>
+                                <td><span class="decision-badge">{{ tx.action_type | action_name }}</span></td>
+                                <td>{{ tx.custom_category if tx.category == 'custom' else tx.category }}</td>
+                                <td>{{ tx.description or '-' }}</td>
+                                <td>
+                                    <strong style="color: {% if tx.action_type in ['pay', 'unreserve'] %}var(--success){% else %}var(--text){% endif %};">
+                                        R$ {{ tx.amount | brl }}
+                                    </strong>
+                                </td>
+                                
+                                <td style="text-align: right; position: relative;">
+                                    <div class="card-options" style="position: static;">
+                                        <button type="button" class="options-trigger" onclick="toggleMenu('menu-tx-{{ tx.id }}')">⋮</button>
+                                        
+                                        <div class="options-menu hidden" id="menu-tx-{{ tx.id }}" style="right: 20px; top: 30px; min-width: 150px; z-index: 50; text-align: left;">
+                                            <button type="button" onclick="openEditModal('{{ url_for('edit_transaction', tx_id=tx.id) }}', '{{ tx.amount }}', '{{ tx.description }}', '{{ tx.category }}')" class="delete-link" style="color: var(--text);">✏️ Modificar</button>
+                                            
+                                            <form method="post" action="{{ url_for('delete_transaction', tx_id=tx.id) }}" onsubmit="return confirm('Tem certeza que deseja apagar? Isso vai recalcular o saldo do seu cartão.')">
+                                                <button type="submit" class="delete-link">🗑️ Apagar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
                             {% else %}
                             <tr><td colspan="7" class="empty-state">Nenhuma transação registrada.</td></tr>
                             {% endfor %}
-                         </tbody>
+                        </tbody>
                     </table>
                 </div>
                 
@@ -214,6 +218,36 @@
             </div>
         </section>
     </main>
+</div>
+
+<div id="edit-modal" class="modal-overlay hidden">
+    <div class="glass-card" style="position: relative;">
+        <button type="button" onclick="closeEditModal()" class="close-modal-btn">✕</button>
+        <h3 style="margin-top: 0;">Editar Transação</h3>
+        
+        <form id="edit-form" method="post" action="" class="form-grid compact-form" style="margin-top: 20px;">
+            <label class="full-width">
+                <span>Novo Valor (R$)</span>
+                <input type="number" step="0.01" name="amount" id="edit-amount" required>
+            </label>
+            <label class="full-width">
+                <span>Nova Observação</span>
+                <input type="text" name="description" id="edit-desc">
+            </label>
+            <label class="full-width">
+                <span>Nova Categoria</span>
+                <select name="category" id="edit-cat" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 14px; width: 100%;">
+                    <option value="Moradia">🏠 Moradia</option>
+                    <option value="Alimentação">🍔 Alimentação</option>
+                    <option value="Transporte">🚗 Transporte</option>
+                    <option value="Lazer">🍿 Lazer</option>
+                    <option value="Emergência">🚨 Emergência</option>
+                    <option value="Geral">Geral</option>
+                </select>
+            </label>
+            <button type="submit" class="primary-button full-width" style="margin-top: 10px;">Salvar Alterações</button>
+        </form>
+    </div>
 </div>
 
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display:none;">
